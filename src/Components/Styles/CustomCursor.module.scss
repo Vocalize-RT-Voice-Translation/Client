@@ -1,0 +1,36 @@
+// CustomCursor.module.scss
+.cursor {
+	width: 25px;
+	height: 25px;
+	border-radius: 50%;
+	background-color: white;
+	position: fixed;
+	top: 0;
+	left: 0;
+	pointer-events: none;
+	z-index: 9999;
+	transform: translate(-50%, -50%);
+	transition: background-color 0.2s ease;
+	scale: 0;
+}
+
+@keyframes click {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.2);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+.transparentCursor {
+	background-color: transparent !important;
+	border: 1px solid white;
+
+	.cursor {
+		transform: scale(2);
+	}
+}

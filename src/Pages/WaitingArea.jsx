@@ -11,7 +11,7 @@ import {
 } from 'react-icons/io5';
 import { MdOutlineErrorOutline } from 'react-icons/md';
 import { FaRegCircleCheck } from 'react-icons/fa6';
-import videodemo from '../Assets/video.mp4';
+// import videodemo from '../Assets/video.mp4';
 import MediaDevices from 'media-devices';
 import { supportsMediaDevices } from 'media-devices';
 import { showToast } from '../Utils/toast.js';

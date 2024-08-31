@@ -1,0 +1,109 @@
+.main {
+	width: 100%;
+	padding: 1rem;
+	min-height: 100vh;
+	background-color: var(--bg);
+	background-image: url('../Assets/bg.svg');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+
+.aboutContainer {
+	font-family: Arial, sans-serif;
+	color: #333;
+	background-color: #f9f9f9;
+	padding: 20px;
+	box-sizing: border-box;
+  }
+  
+  .aboutHeader {
+	text-align: center;
+	
+	color: white;
+	padding: 20px 0;
+  }
+  
+  .aboutHeader h1 {
+	margin: 0;
+	font-size: 2.5em;
+  }
+  
+  .aboutMain {
+	max-width: 100%;
+	margin: 0 auto;
+	padding: 20px;
+  }
+  
+  .descriptionBox {
+	background-color: #ffffff;
+	padding: 10px;
+	margin-bottom: 40px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	border-radius: 8px;
+	text-align: center;
+  }
+  
+  .descriptionBox h2 {
+	margin-top: 0;
+	font-size: 2em;
+  }
+  
+  .descriptionBox p {
+	font-size: 1.2em;
+	line-height: 1.6;
+	color: #555;
+  }
+  
+  .teamSection {
+	
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+
+	border: 1px solid white;
+	height: 60vh;
+	width: 100%;
+	gap: 1rem;
+
+  }
+  
+  .teamMember {
+	
+	background-color:lightgrey;
+	height: auto;
+	
+	width:49%;
+	display: flex;
+	
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+  
+  .teamMember img {
+	border-radius: 50%;
+	width: 150px;
+	height: 150px;
+	object-fit: cover;
+	margin-bottom: 15px;
+  }
+  
+  .memberInfo h3 {
+	margin: 10px 0 5px;
+	font-size: 1.5em;
+	color: #2c3e50;
+  }
+  
+  .memberInfo h4 {
+	margin: 0;
+	font-size: 1.2em;
+	color: #7f8c8d;
+  }
+  
+  .memberInfo p {
+	font-size: 1em;
+	color: #555;
+  }
+
+  

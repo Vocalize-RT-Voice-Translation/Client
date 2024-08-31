@@ -1,0 +1,104 @@
+// * {
+// 	border: 1px solid red;
+// }
+
+.main {
+	width: 100%;
+	background-color: var(--bg);
+	display: flex;
+
+	> .left {
+		width: 50%;
+		padding: 0 0 0 7rem;
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+
+		> h2 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			color: #ffffff;
+			width: 100%;
+			letter-spacing: 0.015rem;
+		}
+
+		> p {
+			font-size: 1.25rem;
+			color: #ffffffdd;
+			width: 100%;
+			margin: 1.25rem 0 0 0;
+			line-height: 2rem;
+
+			> span {
+				color: #ffffffaa;
+				font-size: 0.85rem;
+				font-style: italic;
+			}
+		}
+
+		> .button {
+			padding: 1.5rem 2rem;
+			background-color: white;
+			border-radius: 10rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 1rem;
+			margin: 2rem 0 0 0;
+			width: fit-content;
+			transition: all 0.1s
+				cubic-bezier(0.17, 0.67, 0.83, 0.67);
+			border: 1px solid transparent;
+
+			> p {
+				color: black;
+				font-size: 1rem;
+				font-weight: 700;
+			}
+
+			> svg {
+				font-size: 1.5rem;
+				color: black;
+			}
+
+			&:hover {
+				cursor: pointer;
+				border: 1px solid white;
+				background-color: transparent;
+
+				> p {
+					color: white;
+				}
+
+				> svg {
+					color: white;
+				}
+			}
+		}
+	}
+
+	> .right {
+		width: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		padding: 0 6rem 0 0;
+
+		> .imageWrapper {
+			aspect-ratio: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 2rem 0;
+			width: 30vw;
+			border-radius: 100%;
+			padding: 2rem;
+			overflow: hidden;
+			background-color: #bae3fd;
+
+			> img {
+				width: 30vw;
+			}
+		}
+	}
+}

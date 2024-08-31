@@ -1,0 +1,96 @@
+// * {
+// 	border: 1px solid red;
+// }
+
+.main {
+	width: 100%;
+	display: flex;
+	background-color: var(--bg);
+
+	> .left {
+		height: 100%;
+		width: 50%;
+		display: flex;
+		padding: 0 0 0 4rem;
+
+		> .imageWrapper {
+			aspect-ratio: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 2rem 0;
+			background-color: white;
+			width: 30vw;
+			border-radius: 100%;
+			overflow: hidden;
+			padding: 2rem;
+
+			> img {
+				width: 20vw;
+				aspect-ratio: 1;
+			}
+		}
+	}
+
+	> .right {
+		padding: 0 4rem 0 0;
+		width: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		height: 30vw;
+
+		> h2 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			color: #ffffff;
+			width: 100%;
+			letter-spacing: 0.015rem;
+		}
+
+		> p {
+			font-size: 1.25rem;
+			color: #ffffffdd;
+			width: 100%;
+			margin: 1.25rem 0 0 0;
+			line-height: 2rem;
+
+			> span {
+				color: #ffffffaa;
+				font-size: 0.85rem;
+				font-style: italic;
+			}
+		}
+
+		> .languageCardWrapper {
+			display: flex;
+			width: 100%;
+			margin: 2rem 0 0 0;
+			gap: 1rem;
+
+			> .card {
+				background-color: orange;
+				padding: 1rem 3rem;
+				border-radius: 5rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border: 1px solid transparent;
+				transition: all 0.15s ease-in-out;
+
+				> p {
+					font-size: 1.25rem;
+					color: white;
+					font-weight: 600;
+				}
+
+				&:hover {
+					cursor: pointer;
+					background-color: transparent;
+					border: 1px solid orange;
+				}
+			}
+		}
+	}
+}

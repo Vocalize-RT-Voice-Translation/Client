@@ -87,7 +87,8 @@ const Meeting = () => {
 			});
 	};
 
-	const [isWaiting, setIsWaiting] = useState(true);
+	const [isWaiting, setIsWaiting] =
+		useState(false);
 
 	// useEffect(() => {
 	// 	// Initialize PeerJS

@@ -10,6 +10,7 @@ import {
 	IoMicSharp,
 } from 'react-icons/io5';
 import { MdOutlineErrorOutline } from 'react-icons/md';
+import { FaRegCircleCheck } from 'react-icons/fa6';
 import videodemo from '../Assets/video.mp4';
 import MediaDevices from 'media-devices';
 import { supportsMediaDevices } from 'media-devices';
@@ -18,9 +19,13 @@ import { showToast } from '../Utils/toast.js';
 const WaitingArea = ({
 	userAccepted,
 	userNotAccepted,
+	meetingInfo = {},
 }) => {
 	const [video, setVideo] = useState(true);
 	const [audio, setAudio] = useState(true);
+
+	const { meetingId, joinedUsers = 0 } =
+		meetingInfo;
 
 	const [isAudioAvailable, setIsAudioAvailable] =
 		useState(false);
@@ -101,6 +106,28 @@ const WaitingArea = ({
 		}
 	}, []);
 
+	const renderJoinees = () => {
+		if (joinedUsers.length == 0 || !joinedUsers) {
+			return <p>No one has joined yet!</p>;
+		}
+		if (
+			joinedUsers.length > 1 &&
+			joinedUsers.length < 3
+		) {
+			return (
+				<p>
+					{joinedUsers[0].name} and{' '}
+					{joinedUsers[1].name} are in this call
+				</p>
+			);
+		}
+		if (joinedUsers.length == 1) {
+			return (
+				<p>{joinedUsers[0].name} is in this call</p>
+			);
+		}
+	};
+
 	return (
 		<div className={styles.main}>
 			<div className={styles.left}>
@@ -114,17 +141,52 @@ const WaitingArea = ({
 				</div>
 				<p>This is how you will be appearing!</p>
 				<div className={styles.videoControls}>
-					<div
-						error='true'
-						className={styles.button}
-					>
-						<IoMicOffSharp />
+					{audio ? (
+						<div
+							error='false'
+							className={styles.button}
+							onClick={() => setAudio(false)}
+						>
+							<IoMicSharp />
+						</div>
+					) : (
+						<div
+							error='true'
+							className={styles.button}
+							onClick={() => setAudio(true)}
+						>
+							<IoMicOffSharp />
+						</div>
+					)}
+					{video ? (
+						<div
+							error='false'
+							className={styles.button}
+							onClick={() => setVideo(false)}
+						>
+							<IoVideocam />
+						</div>
+					) : (
+						<div
+							error='true'
+							className={styles.button}
+							onClick={() => setVideo(true)}
+						>
+							<IoVideocamOff />
+						</div>
+					)}
+				</div>
+			</div>
+			<div className={styles.right}>
+				<div className={styles.meetingInfo}>
+					<h2>Meeting Title</h2>
+					<p>Meeting Created by Aditya</p>
+					<div className={styles.meetingJoinees}>
+						{<renderJoinees />}
 					</div>
-					<div
-						error='true'
-						className={styles.button}
-					>
-						<IoVideocamOff />
+					<div className={styles.joinButton}>
+						<p>Ask to Join</p>
+						<FaRegCircleCheck />
 					</div>
 				</div>
 				{isPermissionGranted ? (
@@ -186,7 +248,6 @@ const WaitingArea = ({
 					</div>
 				)}
 			</div>
-			<div className={styles.right}></div>
 		</div>
 	);
 };

@@ -2,7 +2,6 @@
 	height: 100vh;
 	width: 100%;
 	background-color: var(--bg);
-
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -27,7 +26,7 @@
 
 		> .videoWrapper {
 			width: 100%;
-			height: 45%;
+			height: 50%;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -47,14 +46,38 @@
 			justify-content: center;
 			gap: 1rem;
 			padding: 1rem 0;
-			margin: 1rem 0;
+			margin: 0 0 1rem 0;
 
 			> .button {
+				transition: all 0.1s ease-in-out;
+				&:hover {
+					cursor: pointer;
+				}
+
 				&[error='true'] {
 					padding: 1rem;
 					height: 100%;
 					aspect-ratio: 1;
 					background-color: rgb(255, 112, 112);
+					border: 1px solid transparent;
+					border-radius: 100%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+
+					svg {
+						color: white;
+						transition: all 0.1s ease-in-out;
+						font-size: 1.77rem;
+					}
+				}
+
+				&[error='false'] {
+					padding: 1rem;
+					height: 100%;
+					aspect-ratio: 1;
+					background-color: transparent;
+					border: 1px solid #ffffff38;
 					border-radius: 100%;
 					display: flex;
 					align-items: center;
@@ -63,14 +86,84 @@
 					svg {
 						color: white;
 						font-size: 1.77rem;
+						transition: all 0.1s ease-in-out;
 					}
+				}
+			}
+		}
+	}
+
+	> .right {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 50%;
+		height: 100%;
+		padding: 1rem;
+
+		> .meetingInfo {
+			display: flex;
+			justify-content: center;
+			flex-direction: column;
+			width: 75%;
+			margin: 0 0 3rem 0;
+
+			> h2 {
+				font-size: 2rem;
+				color: #ffffffdd;
+				width: 100%;
+				margin-bottom: 0.5rem;
+			}
+
+			> p {
+				font-size: 1.25rem;
+				color: #ffffffc6;
+				width: 100%;
+				margin: 0 0 2rem 0;
+			}
+
+			> .meetingJoinees {
+				width: 100%;
+
+				> p {
+					font-size: 0.95rem;
+					color: #ffffff95;
+					width: 100%;
+				}
+			}
+
+			> .joinButton {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 1rem;
+				background-color: #ffffff;
+				margin: 2rem 0 0 0;
+				padding: 1rem 2rem;
+				border-radius: 10rem;
+				width: fit-content;
+
+				> p {
+					font-size: 1rem;
+					font-weight: 500;
+					color: #000000;
+				}
+
+				> svg {
+					font-size: 1.5rem;
+					color: #525252;
+				}
+
+				&:hover {
+					cursor: pointer;
 				}
 			}
 		}
 
 		> .channelsWrapper {
 			background-color: var(--bg);
-			width: 50%;
+			width: 75%;
 			border: 1px solid rgba(255, 255, 255, 0.221);
 			border-radius: 1rem;
 			padding: 2rem 1rem;
@@ -143,14 +236,5 @@
 				}
 			}
 		}
-	}
-
-	> .right {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid red;
-		width: 50%;
-		height: 100%;
 	}
 }

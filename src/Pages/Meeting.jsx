@@ -22,7 +22,6 @@ import { IoMdMore } from 'react-icons/io';
 import { IoMdSettings } from 'react-icons/io';
 import mediaDevices from 'media-devices';
 import { showToast } from '../Utils/toast';
-
 import {
 	ControlledMenu,
 	MenuItem,
@@ -31,10 +30,12 @@ import {
 } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/zoom.css';
-
 import WaitingArea from './WaitingArea.jsx';
+import Peer from 'peerjs';
+import io from 'socket.io-client';
 
 const Meeting = () => {
+	const socket = io('http://localhost:3000');
 	const { id } = useParams();
 	const MenuRef = useRef(null);
 	const [menuState, toggleMenu] = useMenuState({
@@ -87,8 +88,7 @@ const Meeting = () => {
 			});
 	};
 
-	const [isWaiting, setIsWaiting] =
-		useState(false);
+	const [isWaiting, setIsWaiting] = useState(true);
 
 	// useEffect(() => {
 	// 	// Initialize PeerJS

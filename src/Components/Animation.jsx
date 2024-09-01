@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styles from './Styles/Animation.module.scss';
-import english from '../Assets/namaste-eng.png';
+import english from '../Assets/hello.png';
 import hindi from '../Assets/namaste.jpg';
 import vocalize from '../Assets/vocalize-white.png';
 import logoBlack from '../Assets/vocalize-black.png';

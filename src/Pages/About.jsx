@@ -1,68 +1,74 @@
-
-
-import React from 'react';
-import styles from '../Styles/About.module.css';
-
-const teamMembers = [
-  {
-    name: 'Aditya singh',
-    role: 'Lead Developer',
-    description: 'aditya is an expert in full-stack development with over 10 years of experience in creating scalable web applications.',
-    imageUrl: 'path/to/member1.jpg', 
-  },
-  {
-    name: 'sonam yadav',
-    role: 'managing director',
-    description: 'sonam oversees project execution and ensures that all deliverables meet client expectations and deadlines.',
-    imageUrl: 'path/to/member2.jpg',
-  },
-  {
-    name: 'ankit pal',
-    role: 'frontend developer',
-    description: 'ankit oversees project execution and ensures that all deliverables meet client expectations and deadlines.',
-    imageUrl: 'path/to/member2.jpg',
-  },
-  {
-    name: 'greeshma shetty',
-    role: 'Project Manager',
-    description: 'greeshma oversees project execution and ensures that all deliverables meet client expectations and deadlines.',
-    imageUrl: 'path/to/member2.jpg',
-  },
- 
-];
+import React, { useState } from 'react';
+import { RiHomeSmileLine } from 'react-icons/ri';
+import styles from '../Styles/About.module.scss';
+import { useNavigate } from 'react-router-dom';
 
 const About = () => {
-  return (
-    <div className ={styles.main}>
-      <header className={styles.aboutHeader}>
-        <h1>About Our Team</h1>
-      </header>
-
-      <main className={styles.aboutMain}>
-        <section className={styles.descriptionBox}>
-          <h2>Who We Are</h2>
-          <p>
-            Our team consists of highly skilled professionals passionate about delivering excellence. 
-            With a diverse range of expertise and backgrounds, we collaborate to tackle challenges 
-            from multiple perspectives and drive innovation.
-          </p>
-        </section>
-
-        <section className={styles.teamSection}>
-          {teamMembers.map((member, index) => (
-            <div className={styles.teamMember} key={index}>
-              <img src={member.imageUrl} alt={`Portrait of ${member.name}`} />
-              <div className={styles.memberInfo}>
-                <h3>{member.name}</h3>
-                <h4>{member.role}</h4>
-                <p>{member.description}</p>
-              </div>
-            </div>
-          ))}
-        </section>
-      </main>
-    </div>
-  );
+	const navigate = useNavigate();
+	const [members, setMembers] = useState([
+		{
+			name: 'Aditya Singh',
+			role: 'Full Stack Developer',
+			img: 'https://via.placeholder.com/150',
+		},
+		{
+			name: 'Ankit Pal',
+			role: 'Python Expert',
+			img: 'https://via.placeholder.com/150',
+		},
+		{
+			name: 'Sonam Yadav',
+			role: 'AI/ML Expert',
+			img: 'https://via.placeholder.com/150',
+		},
+		{
+			name: 'Greeshma Shetty',
+			role: 'Python + Documentation',
+			img: 'https://via.placeholder.com/150',
+		},
+	]);
+	return (
+		<div className={styles.main}>
+			<div
+				className={styles.backtoHome}
+				onClick={() => {
+					navigate('/');
+				}}
+			>
+				<p>Back to Home</p>
+				<RiHomeSmileLine />
+			</div>
+			<h1>OUR</h1>
+			<h2>
+				<span>CREATIVE</span> TEAM
+			</h2>
+			<p>
+				Lorem ipsum dolor sit amet consectetur
+				adipisicing elit. Reprehenderit placeat
+				adipisci repellendus nihil impedit, quam
+				repudiandae possimus pariatur ea autem at vero
+				exercitationem expedita temporibus illum sequi
+				dolorem. Debitis, excepturi.
+			</p>
+			<div className={styles.memberWrapper}>
+				{members.map((member, index) => (
+					<div
+						className={styles.member}
+						key={index}
+					>
+						<h3>{member.name}</h3>
+						<p>{member.role}</p>
+						<div className={styles.image}>
+							<img
+								src={member.img}
+								alt={member.name}
+							/>
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	);
 };
 
 export default About;

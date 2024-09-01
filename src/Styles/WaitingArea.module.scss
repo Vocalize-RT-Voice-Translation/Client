@@ -1,6 +1,23 @@
+@import './mixins.scss';
+
 .main {
 	height: 100vh;
 	width: 100%;
+	width: 100%;
+	background-image: linear-gradient(
+			#4a4a4a65 0.5px,
+			transparent 0.5px,
+			transparent calc(100% - 0.5px),
+			#4a4a4a65 calc(100% - 0.5px)
+		),
+		linear-gradient(
+			90deg,
+			#4a4a4a65 0.5px,
+			transparent 0.5px,
+			transparent calc(100% - 0.5px),
+			#4a4a4a65 calc(100% - 0.5px)
+		);
+	background-size: 3rem 3rem;
 	background-color: var(--bg);
 	display: flex;
 	align-items: center;
@@ -31,7 +48,7 @@
 			align-items: center;
 			justify-content: center;
 
-			> video {
+			> img {
 				aspect-ratio: 1;
 				height: 100%;
 				object-fit: cover;
@@ -113,6 +130,7 @@
 				font-size: 2rem;
 				color: #ffffffdd;
 				width: 100%;
+				line-height: 90%;
 				margin-bottom: 0.5rem;
 			}
 
@@ -120,7 +138,7 @@
 				font-size: 1.25rem;
 				color: #ffffffc6;
 				width: 100%;
-				margin: 0 0 2rem 0;
+				margin: 0 0 1.5rem 0;
 			}
 
 			> .meetingJoinees {
@@ -143,20 +161,25 @@
 				padding: 1rem 2rem;
 				border-radius: 10rem;
 				width: fit-content;
+				border: 1px solid transparent;
+				transition: all 0.2s ease-in-out;
 
 				> p {
 					font-size: 1rem;
 					font-weight: 500;
 					color: #000000;
+					transition: all 0.2s ease-in-out;
 				}
 
 				> svg {
 					font-size: 1.5rem;
 					color: #525252;
+					transition: all 0.2s ease-in-out;
 				}
 
 				&:hover {
 					cursor: pointer;
+					@include hoverButton();
 				}
 			}
 		}

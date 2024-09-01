@@ -1,0 +1,14 @@
+@mixin hoverButton() {
+	cursor: pointer;
+	background-color: transparent;
+	border: 1px solid white;
+	transition: all 0.2s ease-in-out;
+
+	> p {
+		color: white;
+	}
+
+	> svg {
+		color: white;
+	}
+}

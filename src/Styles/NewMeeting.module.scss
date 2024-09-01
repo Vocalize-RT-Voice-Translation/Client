@@ -1,0 +1,176 @@
+@import './_mixins.scss';
+
+.main {
+	height: 100vh;
+	width: 100%;
+	background-image: linear-gradient(
+			#4a4a4a65 0.5px,
+			transparent 0.5px,
+			transparent calc(100% - 0.5px),
+			#4a4a4a65 calc(100% - 0.5px)
+		),
+		linear-gradient(
+			90deg,
+			#4a4a4a65 0.5px,
+			transparent 0.5px,
+			transparent calc(100% - 0.5px),
+			#4a4a4a65 calc(100% - 0.5px)
+		);
+	background-size: 3rem 3rem;
+	background-color: var(--bg);
+	padding: 2.5rem 4rem 1rem 4rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+
+	> .left {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		width: 50%;
+		height: 100%;
+
+		> .imageWrapper {
+			background-color: white;
+			width: 75%;
+			height: 45%;
+			overflow: hidden;
+			border-radius: 4rem;
+
+			> img {
+				width: 100%;
+				height: 100%;
+			}
+		}
+
+		h3 {
+			font-size: 3rem;
+			font-weight: 500;
+			color: white;
+			margin-top: 2rem;
+		}
+
+		> p {
+			font-size: 1.5rem;
+			font-weight: 500;
+			color: #ffffffaf;
+			margin-top: 0.35rem;
+		}
+	}
+
+	> .right {
+		width: 50%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+
+		> .newMeetingCard {
+			padding: 0.5rem 2rem;
+			background-color: white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 1rem;
+			border-radius: 3rem;
+			transition: all 0.2s ease-in-out;
+			border: 1px solid transparent;
+			margin: 1rem 0 0 0;
+
+			> p {
+				font-size: 1rem;
+				font-weight: 500;
+				color: #000000;
+				transition: all 0.2s ease-in-out;
+			}
+
+			> svg {
+				font-size: 2.5rem;
+				color: #000000;
+				transform: rotate(20deg);
+				transition: all 0.2s ease-in-out;
+			}
+
+			&:hover {
+				@include hoverButton();
+			}
+		}
+
+		> .bisection {
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			> .line {
+				width: 30%;
+				height: 1px;
+				background-color: #ffffff4a;
+				margin: 1rem 0;
+			}
+
+			> p {
+				font-size: 1.5rem;
+				font-weight: 200;
+				color: #ffffff;
+				margin: 1rem 0;
+			}
+		}
+
+		> .joinMeetingCard {
+			padding: 2rem 2rem;
+			background-color: transparent;
+			width: 60%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+
+			> h2 {
+				font-size: 2.5rem;
+				font-weight: 500;
+				color: var(--text);
+				margin: 0 0 1rem 0;
+			}
+
+			> p {
+				font-size: 1.2rem;
+				font-weight: 200;
+				color: #ffffff;
+			}
+
+			> .codeBoxWrapper {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 1rem;
+				margin: 2rem 0 0 0;
+
+				> input {
+					width: 100%;
+					aspect-ratio: 1;
+					padding: 0.5rem 1rem;
+					font-size: 1rem;
+					font-weight: 500;
+					color: white;
+					background-color: var(--bg);
+					border: 1px solid #ffffff4a;
+					transition: all 0.2s ease-in-out;
+					font-size: 2rem;
+					text-align: center;
+
+					&:focus {
+						outline: none;
+						border: 1px solid white;
+						-webkit-box-shadow: 10px 10px 0px -2px rgb(255, 255, 255);
+						-moz-box-shadow: 10px 10px 0px -2px rgb(255, 255, 255);
+						box-shadow: 8px 8px 0px -5px rgb(255, 255, 255);
+					}
+				}
+			}
+		}
+	}
+}

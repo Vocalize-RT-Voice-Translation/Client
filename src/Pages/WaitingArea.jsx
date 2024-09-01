@@ -15,6 +15,7 @@ import { FaRegCircleCheck } from 'react-icons/fa6';
 import MediaDevices from 'media-devices';
 import { supportsMediaDevices } from 'media-devices';
 import { showToast } from '../Utils/toast.js';
+import person from '../Assets/person.jpg';
 
 const WaitingArea = ({
 	userAccepted,
@@ -106,7 +107,7 @@ const WaitingArea = ({
 		}
 	}, []);
 
-	const renderJoinees = () => {
+	const RenderJoinees = () => {
 		if (joinedUsers.length == 0 || !joinedUsers) {
 			return <p>No one has joined yet!</p>;
 		}
@@ -132,12 +133,12 @@ const WaitingArea = ({
 		<div className={styles.main}>
 			<div className={styles.left}>
 				<div className={styles.videoWrapper}>
-					<video
+					<img
 						muted
 						autoPlay
 						loop
-						src={videodemo}
-					></video>
+						src={person}
+					></img>
 				</div>
 				<p>This is how you will be appearing!</p>
 				<div className={styles.videoControls}>
@@ -182,7 +183,7 @@ const WaitingArea = ({
 					<h2>Meeting Title</h2>
 					<p>Meeting Created by Aditya</p>
 					<div className={styles.meetingJoinees}>
-						{<renderJoinees />}
+						<RenderJoinees />
 					</div>
 					<div className={styles.joinButton}>
 						<p>Ask to Join</p>

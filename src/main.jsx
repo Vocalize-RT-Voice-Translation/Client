@@ -15,6 +15,8 @@ import Technology from './Pages/Technology.jsx';
 import Developers from './Pages/Developers.jsx';
 import Translate from './Pages/Translate.jsx';
 import Meeting from './Pages/Meeting.jsx';
+import Test from './Pages/Test.jsx';
+import NewMeeting from './Pages/NewMeeting.jsx';
 
 ReactDOM.createRoot(
 	document.getElementById('root')
@@ -47,6 +49,14 @@ ReactDOM.createRoot(
 					<Route
 						path='/meeting/:id'
 						element={<Meeting />}
+					/>
+					<Route
+						path='/meeting'
+						element={<NewMeeting />}
+					/>
+					<Route
+						path='/test'
+						element={<Test />}
 					/>
 				</Routes>
 			</Layout>

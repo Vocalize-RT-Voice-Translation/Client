@@ -17,49 +17,60 @@ import Translate from './Pages/Translate.jsx';
 import Meeting from './Pages/Meeting.jsx';
 import Test from './Pages/Test.jsx';
 import NewMeeting from './Pages/NewMeeting.jsx';
+import { RecoilRoot } from 'recoil';
+import WaitingArea from './Pages/WaitingArea.jsx';
+import { SocketProvider } from './Pages/Socketcontext.jsx';
 
 ReactDOM.createRoot(
 	document.getElementById('root')
 ).render(
 	<>
-		<Toaster />
-		<BrowserRouter>
-			<Layout>
-				<Routes>
-					<Route
-						path='/'
-						element={<Home />}
-					/>
-					<Route
-						path='/translate'
-						element={<Translate />}
-					/>
-					<Route
-						path='/about'
-						element={<About />}
-					/>
-					<Route
-						path='/technology'
-						element={<Technology />}
-					/>
-					<Route
-						path='/developers'
-						element={<Developers />}
-					/>
-					<Route
-						path='/meeting/:id'
-						element={<Meeting />}
-					/>
-					<Route
-						path='/meeting'
-						element={<NewMeeting />}
-					/>
-					<Route
-						path='/test'
-						element={<Test />}
-					/>
-				</Routes>
-			</Layout>
-		</BrowserRouter>
+		<RecoilRoot>
+			<SocketProvider>
+				<Toaster />
+				<BrowserRouter>
+					<Layout>
+						<Routes>
+							<Route
+								path='/'
+								element={<Home />}
+							/>
+							<Route
+								path='/translate'
+								element={<Translate />}
+							/>
+							<Route
+								path='/about'
+								element={<About />}
+							/>
+							<Route
+								path='/technology'
+								element={<Technology />}
+							/>
+							<Route
+								path='/developers'
+								element={<Developers />}
+							/>
+							<Route
+								path='/meeting/:id'
+								element={<Meeting />}
+							/>
+							<Route
+								path='/meeting'
+								element={<NewMeeting />}
+							/>
+							<Route
+								path='/waiting/:id'
+								element={<WaitingArea />}
+							/>
+							<Route
+								path='/test'
+								element={<Test />}
+							/>
+						</Routes>
+					</Layout>
+				</BrowserRouter>
+			</SocketProvider>
+		</RecoilRoot>
 	</>
 );

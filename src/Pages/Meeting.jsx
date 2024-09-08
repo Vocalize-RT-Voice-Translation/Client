@@ -1,7 +1,6 @@
 import React, {
 	useEffect,
 	useState,
-	useRef,
 } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from '../Styles/Meeting.module.scss';
@@ -15,6 +14,7 @@ import {
 	MdVideocam,
 	MdVideocamOff,
 } from 'react-icons/md';
+import { GoPersonAdd } from 'react-icons/go';
 import { BsCcCircle } from 'react-icons/bs';
 import { AiOutlineLogout } from 'react-icons/ai';
 import { BsTranslate } from 'react-icons/bs';
@@ -22,60 +22,41 @@ import { IoMdMore } from 'react-icons/io';
 import { IoMdSettings } from 'react-icons/io';
 import mediaDevices from 'media-devices';
 import { showToast } from '../Utils/toast';
-import {
-	ControlledMenu,
-	MenuItem,
-	useClick,
-	useMenuState,
-} from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/zoom.css';
-import WaitingArea from './WaitingArea.jsx';
-import Peer from 'peerjs';
-import io from 'socket.io-client';
+import useConnections from '../Components/useConnections.jsx';
+import { useLocation } from 'react-router-dom';
+import enterRoom from '../Assets/enter.mp3';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const Meeting = () => {
-	const socket = io('http://localhost:3000');
 	const { id } = useParams();
-	const MenuRef = useRef(null);
-	const [menuState, toggleMenu] = useMenuState({
-		transition: true,
-	});
-	const anchorProps = useClick(
-		menuState.state,
-		toggleMenu
+	const navigate = useNavigate();
+	const location = useLocation();
+
+	const [joinee, setJoinee] = useState(false);
+
+	const [MeetingData, setMeetingData] = useState(
+		location?.state?.data ?? {}
 	);
-	const mYid = 1234;
+
+	const { roomId, Host, Joinee, myId } =
+		MeetingData;
+
 	const [controls, setControls] = useState({
 		isMicMuted: false,
 		isVideoOff: false,
 		isCaptionsEnabled: false,
 		isTranslationEnabled: false,
 	});
-	const [members, setMembers] = useState([
-		{
-			id: 1234,
-			name: 'Aditya Singh',
-			isTalking: false,
-			isVideoAvailable: false,
-			isMuted: false,
-		},
-		{
-			id: 2,
-			name: 'Sonam Yadav',
-			isTalking: false,
-			isVideoAvailable: false,
-			isMuted: true,
-		},
-	]);
+
+	const [members, setMembers] = useState([]);
+
 	const [audioStream, setAudioStream] =
 		useState(null);
 	const [videoStream, setVideoStream] =
 		useState(null);
-	const [peerId, setPeerId] = useState(null);
-	const [connections, setConnections] = useState(
-		[]
-	);
 
 	const [pinnedMember, setPinnedMember] =
 		useState(null);
@@ -88,71 +69,63 @@ const Meeting = () => {
 			});
 	};
 
-	const [isWaiting, setIsWaiting] = useState(true);
+	useEffect(() => {
+		console.log(MeetingData);
+		if (Object.keys(MeetingData).length != 0) {
+			Cookies.set('roomId', MeetingData.roomId);
+			Cookies.set(
+				'MeetingData',
+				JSON.stringify(MeetingData)
+			);
+		}
 
-	// useEffect(() => {
-	// 	// Initialize PeerJS
-	// 	const peerInstance = new Peer();
+		const roomId = Cookies.get('roomId') ?? '';
 
-	// 	peerInstance.on('open', (id) => {
-	// 		setPeerId(id);
-	// 	});
+		if (roomId != '' && roomId == id) {
+			if (MeetingData == {}) {
+				setIswaiting(false);
+				setMeetingData(
+					JSON.parse(Cookies.get('MeetingData'))
+				);
+				getMembers();
+			}
+		}
+		// } else {
+		// 	navigate('/meeting');
+		// }
+	}, []);
 
-	// 	peerInstance.on('connection', (conn) => {
-	// 		conn.on('data', (data) => {
-	// 			console.log('Received', data);
-	// 		});
-	// 		setConnections((prevConnections) => [
-	// 			...prevConnections,
-	// 			conn,
-	// 		]);
-	// 	});
+	useEffect(() => {
+		onSocketEvent('join-meeting', (data) => {
+			if (data.status == 'success') {
+				playEnter();
+				setIswaiting(false);
+				showToast('Joined the meeting', 'success');
+			}
+		});
 
-	// 	return () => {
-	// 		peerInstance.destroy();
-	// 	};
-	// }, []);
+		onSocketEvent('get-members', (data) => {
+			console.log(data);
+		});
 
-	// useEffect(() => {
-	// 	// Request microphone access
-	// 	mediaDevices
-	// 		.getUserMedia({ audio: true })
-	// 		.then((stream) => {
-	// 			setAudioStream(stream);
-	// 			// You can process the audio stream here
-	// 		})
-	// 		.catch((err) => {
-	// 			console.error(
-	// 				'Error accessing microphone:',
-	// 				err
-	// 			);
-	// 		});
+		return () => {
+			socketOff('join-meeting');
+			socketOff('get-members');
+		};
+	}, []);
 
-	// 	// Request video access
-	// 	mediaDevices
-	// 		.getUserMedia({ video: true, audio: true })
-	// 		.then((stream) => {
-	// 			setVideoStream(stream);
-	// 		})
-	// 		.catch((err) => {
-	// 			console.error('Error accessing camera:', err);
-	// 		});
-
-	// 	return () => {
-	// 		if (audioStream) {
-	// 			audioStream
-	// 				.getTracks()
-	// 				.forEach((track) => track.stop());
-	// 		}
-	// 		if (videoStream) {
-	// 			videoStream
-	// 				.getTracks()
-	// 				.forEach((track) => track.stop());
-	// 		}
-	// 	};
-	// }, []);
+	const {
+		socketId,
+		peerId,
+		emitSocketEvent,
+		onSocketEvent,
+		onPeerEvent,
+		emitPeerEvent,
+		socketOff,
+	} = useConnections();
 
 	const toggleMic = () => {
+		getMembers();
 		setControls((prevControls) => ({
 			...prevControls,
 			isMicMuted: !prevControls.isMicMuted,
@@ -210,40 +183,17 @@ const Meeting = () => {
 		}
 	};
 
-	const connectToPeer = (peerId) => {
-		const conn = peer.connect(peerId);
-		conn.on('open', () => {
-			conn.send('Hello from ' + peer.id);
+	const getMembers = () => {
+		emitSocketEvent('get-members', {
+			roomId,
 		});
-		setConnections((prevConnections) => [
-			...prevConnections,
-			conn,
-		]);
 	};
 
-	const showCardMenu = () => {
-		return (
-			<ControlledMenu
-				{...menuState}
-				anchorRef={MenuRef}
-				onClose={() => toggleMenu(false)}
-			>
-				<MenuItem
-					onClick={(e) => {
-						setPinnedMember(e.member.id);
-					}}
-				>
-					Pin
-				</MenuItem>
-			</ControlledMenu>
-		);
-	};
-
-	const renderMembers = () => {
-		return members.map((member, index) => {
-			return member.id == mYid ? (
+	const RenderMembers = () => {
+		return members?.map((member, index) => {
+			return member.id == myId ? (
 				<div
-					key={index}
+					key={member._id}
 					className={styles.card}
 				>
 					<div className={styles.actionButtons}>
@@ -263,7 +213,7 @@ const Meeting = () => {
 				</div>
 			) : (
 				<div
-					key={index}
+					key={member._id}
 					className={styles.card}
 				>
 					<div className={styles.actionButtons}>
@@ -283,7 +233,6 @@ const Meeting = () => {
 							{...anchorProps}
 						>
 							<IoMdMore />
-							{showCardMenu()}
 						</div>
 					</div>
 					<InitialsAvatar
@@ -296,9 +245,12 @@ const Meeting = () => {
 		});
 	};
 
-	return isWaiting ? (
-		<WaitingArea />
-	) : (
+	const playEnter = () => {
+		const audio = new Audio(enterRoom);
+		audio.play();
+	};
+
+	return (
 		<div className={styles.main}>
 			<div className={styles.titleBar}>
 				<p className={styles.title}>Meeting Title</p>
@@ -307,19 +259,19 @@ const Meeting = () => {
 				</p>
 			</div>
 			<div className={styles.cardWrapper}>
-				{renderMembers()}
+				<RenderMembers />
 			</div>
 			<div className={styles.bottomNavbar}>
 				{controls.isMicMuted ? (
 					<div
-						className={styles.micOff}
+						className={styles.unfocus}
 						onClick={toggleMic}
 					>
 						<IoMicOffSharp />
 					</div>
 				) : (
 					<div
-						className={styles.micOn}
+						className={styles.focus}
 						onClick={toggleMic}
 					>
 						<IoMicSharp />
@@ -328,14 +280,14 @@ const Meeting = () => {
 
 				{controls.isVideoOff ? (
 					<div
-						className={styles.micOff}
+						className={styles.unfocus}
 						onClick={toggleVideo}
 					>
 						<MdVideocamOff />
 					</div>
 				) : (
 					<div
-						className={styles.micOn}
+						className={styles.focus}
 						onClick={toggleVideo}
 					>
 						<MdVideocam />
@@ -344,14 +296,14 @@ const Meeting = () => {
 
 				{controls.isCaptionsEnabled ? (
 					<div
-						className={styles.micOn}
+						className={styles.focus}
 						onClick={toggleCaptions}
 					>
 						<BsCcCircle />
 					</div>
 				) : (
 					<div
-						className={styles.micOff}
+						className={styles.unfocus}
 						onClick={toggleCaptions}
 					>
 						<BsCcCircle />
@@ -359,14 +311,14 @@ const Meeting = () => {
 				)}
 				{controls.isTranslationEnabled ? (
 					<div
-						className={styles.micOn}
+						className={styles.focus}
 						onClick={toggleTranslation}
 					>
 						<BsTranslate />
 					</div>
 				) : (
 					<div
-						className={styles.micOff}
+						className={styles.unfocus}
 						onClick={toggleTranslation}
 					>
 						<BsTranslate />
@@ -374,6 +326,9 @@ const Meeting = () => {
 				)}
 				<div className={styles.hangUp}>
 					<AiOutlineLogout />
+				</div>
+				<div className={styles.icon}>
+					<GoPersonAdd />
 				</div>
 
 				<div className={styles.settings}>

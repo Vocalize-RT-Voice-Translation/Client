@@ -220,15 +220,13 @@
 
 		> .notPermitted {
 			background-color: var(--bg);
-			width: 50%;
+			width: 75%;
 			border: 1px solid rgba(255, 255, 255, 0.221);
 			border-radius: 1rem;
-			padding: 2rem 1rem;
+			padding: 2rem 1.75rem;
 			display: flex;
-			align-items: center;
 			justify-content: center;
 			flex-direction: column;
-			gap: 0.5rem;
 
 			> svg {
 				font-size: 3rem;
@@ -238,9 +236,9 @@
 			> p {
 				font-size: 1rem;
 				color: #ffffffab;
-				width: 75%;
-				margin: 0 0 0.5rem 0;
-				text-align: center;
+				margin: 0 0 0.75rem 0;
+				text-align: left;
+				margin: 1rem 0;
 			}
 
 			> .approvePermission {
@@ -252,10 +250,12 @@
 				font-size: 1rem;
 				font-weight: 600;
 				cursor: pointer;
+				width: fit-content;
 				transition: background-color 0.3s;
 
 				> p {
 					color: #000000;
+					font-weight: 500;
 				}
 			}
 		}

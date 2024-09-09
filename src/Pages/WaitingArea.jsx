@@ -15,42 +15,46 @@ import MediaDevices from 'media-devices';
 import { supportsMediaDevices } from 'media-devices';
 import { showToast } from '../Utils/toast.js';
 import person from '../Assets/person.jpg';
-import useConnections from '../Components/useConnections.jsx';
 import { useParams } from 'react-router-dom';
 import Loader from './Loader.jsx';
+import { useConnections } from './SocketPeerContext.jsx';
+import { useNavigate } from 'react-router-dom';
+import { createUserId } from '../Utils/helper.js';
 
 const WaitingArea = () => {
-	const { id: roomId = 99999 } = useParams();
+	const { socket, peer } = useConnections();
+	const roomId = useParams().id ?? 746464;
 
-	const {
-		socketId,
-		emitSocketEvent,
-		onSocketEvent,
-		socketOff,
-		peerId,
-	} = useConnections();
+	console.log(roomId);
 
 	const [isLoading, setIsLoading] = useState({
-		loading: true,
+		loading: false,
 		message: 'Fetching Room Details',
 	});
+
+	const userId = createUserId();
+
+	const navigate = useNavigate();
 	const [video, setVideo] = useState(true);
 	const [audio, setAudio] = useState(true);
-	const [joineeDetails, setJoineeDetails] =
-		useState({});
 
 	const [isAudioAvailable, setIsAudioAvailable] =
 		useState(false);
 	const [isVideoAvailable, setIsVideoAvailable] =
 		useState(false);
 
-	const [joinedUsers, setJoinedUsers] = useState(
-		[]
-	);
+	const [roomDetails, setRoomDetails] = useState({
+		host: '',
+		memberList: [],
+		membersCount: 0,
+	});
 
-	const [roomDetails, setRoomDetails] = useState(
-		{}
-	);
+	const [joineeDetails, setJoineeDetails] =
+		useState({
+			joinee: false,
+			name: 'Guest',
+			peerId: '',
+		});
 
 	const [channels, setChannels] = useState({
 		video: [],
@@ -67,11 +71,40 @@ const WaitingArea = () => {
 		setIsPermissionGranted,
 	] = useState(false);
 
-	const getRoomData = () => {
-		emitSocketEvent('fetch-room-data', {
-			roomId: roomId,
+	useEffect(() => {
+		console.log(joineeDetails);
+	}, [joineeDetails]);
+
+	useEffect(() => {
+		console.log(socket.id);
+		socket.on('get-room-data', (data) => {
+			console.log(data);
+			if (data.status == 'failed') {
+				showToast('No Meeting Found!', 'error');
+				setIsLoading({
+					...isLoading,
+					message: 'No Meeting Found',
+				});
+				// setTimeout(() => {
+				// 	window.location.href = '/meeting';
+				// }, 2000);
+			} else {
+				setIsLoading({
+					loading: false,
+					message: 'Room Details Fetched',
+				});
+				setRoomDetails({
+					host: data.host,
+					memberList: data.memberList,
+					membersCount: data.membersCount,
+				});
+			}
 		});
-	};
+
+		return () => {
+			socket.off('room-data');
+		};
+	}, []);
 
 	useEffect(() => {
 		const queryParams = new URLSearchParams(
@@ -79,45 +112,23 @@ const WaitingArea = () => {
 		);
 		setJoineeDetails(() => {
 			return {
+				roomId: roomId,
 				joinee: queryParams.get('joinee') ?? false,
 				name: queryParams.get('name') ?? 'Guest',
-				peerId: peerId,
+				peerId: peer.id,
 			};
 		});
-
 		getRoomData();
 	}, []);
 
-	useEffect(() => {
-		onSocketEvent('room-data', (data) => {
-			if (data.message == 'Room not found') {
-				showToast('No Meeting Found!', 'error');
-				setIsLoading({
-					...isLoading,
-					message: 'No Meeting Found',
-				});
-				setTimeout(() => {
-					window.location.href = '/meeting';
-				}, 2000);
-			} else {
-				setIsLoading({
-					loading: false,
-					message: 'Room Details Fetched',
-				});
-				setRoomDetails(data);
-			}
+	const getRoomData = () => {
+		socket.emit('get-room-data', {
+			roomId,
 		});
-
-		return () => {
-			socketOff('room-details');
-		};
-	}, []);
+	};
 
 	useEffect(() => {
-		if (roomDetails) {
-			console.log(roomDetails);
-			setJoinedUsers(roomDetails.joinees);
-		}
+		console.log(roomDetails);
 	}, [roomDetails]);
 
 	const checkPermission = async () => {
@@ -180,45 +191,31 @@ const WaitingArea = () => {
 	}, []);
 
 	const RenderJoinees = () => {
-		if (joinedUsers) {
-			if (joinedUsers.length == 0 || !joinedUsers) {
-				return <p>No one has joined yet!</p>;
-			}
-			if (
-				joinedUsers.length > 1 &&
-				joinedUsers.length < 3
-			) {
-				return (
-					<p>
-						{joinedUsers[0].name} and{' '}
-						{joinedUsers[1].name} are in this call
-					</p>
-				);
-			}
-			if (joinedUsers.length == 1) {
-				return (
-					<p>{joinedUsers[0].name} is in this call</p>
-				);
-			}
-		} else {
-			return <p>Rendering Joined Users . . .</p>;
-		}
+		return (
+			<p>
+				{`${roomDetails.memberList.length}`} people
+				have joined the call
+			</p>
+		);
 	};
 
-	useEffect(() => {
-		onSocketEvent('join-room', (data) => {
-			console.log(data);
-		});
-
-		return () => {
-			socketOff('join-room');
-		};
-	});
-
 	const joinIn = () => {
-		emitSocketEvent('join-room', {
-			roomId: roomId,
-			joinee: joineeDetails,
+		const data = {
+			roomId: String(roomId),
+			user: {
+				id: userId,
+				name: joineeDetails.name,
+				roomId: String(roomId),
+				socketId: socket.id,
+				peerId: peer.id,
+				isTalking: false,
+				isMuted: false,
+				isVideoCamOn: false,
+				isHost: false,
+			},
+		};
+		navigate(`/meeting/${roomId}`, {
+			state: { isWaiting: false, data: data },
 		});
 	};
 

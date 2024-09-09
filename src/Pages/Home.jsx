@@ -6,9 +6,13 @@ import FeatureOne from '../Components/FeatureOne.jsx';
 import LocomotiveScroll from 'locomotive-scroll';
 import Meet from '../Components/Meet.jsx';
 import Animation from '../Components/Animation.jsx';
+import { useConnections } from './SocketPeerContext.jsx';
 
 const Home = () => {
+	const { socket, peer } = useConnections();
+
 	useEffect(() => {
+		console.log(socket.id);
 		const locomotiveScroll = new LocomotiveScroll({
 			smooth: true,
 			smoothMobile: true,

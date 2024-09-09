@@ -19,14 +19,14 @@ import Test from './Pages/Test.jsx';
 import NewMeeting from './Pages/NewMeeting.jsx';
 import { RecoilRoot } from 'recoil';
 import WaitingArea from './Pages/WaitingArea.jsx';
-import { SocketProvider } from './Pages/Socketcontext.jsx';
+import { ConnectionProvider } from './Pages/SocketPeerContext.jsx';
 
 ReactDOM.createRoot(
 	document.getElementById('root')
 ).render(
 	<>
 		<RecoilRoot>
-			<SocketProvider>
+			<ConnectionProvider>
 				<Toaster />
 				<BrowserRouter>
 					<Layout>
@@ -67,10 +67,14 @@ ReactDOM.createRoot(
 								path='/test'
 								element={<Test />}
 							/>
+							<Route
+								path='*'
+								element={<Home />}
+							/>
 						</Routes>
 					</Layout>
 				</BrowserRouter>
-			</SocketProvider>
+			</ConnectionProvider>
 		</RecoilRoot>
 	</>
 );

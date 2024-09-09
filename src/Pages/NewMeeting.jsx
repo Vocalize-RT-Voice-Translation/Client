@@ -8,29 +8,19 @@ import Newmeeting from '../Assets/Newmeeting.jpg';
 import { MdOutlineBolt } from 'react-icons/md';
 import { CiCircleCheck } from 'react-icons/ci';
 import Farzi from 'farzi.js';
-import { v4 as uuidv4 } from 'uuid';
 import { showToast } from '../Utils/toast.js';
 import { useNavigate } from 'react-router-dom';
 import enterSound from '../Assets/enter.mp3';
-import { useSocket } from './Socketcontext.jsx';
+import { useConnections } from './SocketPeerContext.jsx';
+import { createUserId } from '../Utils/helper.js';
 
 const NewMeeting = () => {
+	const { socket, peer } = useConnections();
+
 	const navigate = useNavigate();
 	const [index, setIndex] = useState(0);
 	const [code, setCode] = useState('');
 	const [joineeName, setJoineeName] = useState('');
-
-	const {
-		socketId,
-		peerId,
-		emitSocketEvent,
-		onSocketEvent,
-		onPeerEvent,
-		emitPeerEvent,
-		socketOff,
-	} = useSocket();
-
-	console.log(socketId);
 
 	const [words, setWords] = useState([
 		'Meeting',
@@ -38,6 +28,42 @@ const NewMeeting = () => {
 		'Collaboration',
 		'Communication',
 	]);
+
+	const userId = createUserId();
+
+	useEffect(() => {
+		socket.on('fetch-room-data', (data) => {
+			if (data.message == 'Room not found') {
+				resetInputs();
+				setCode('');
+				showToast('No Meeting Found!', 'error');
+			} else {
+				navigate(
+					`/waiting/${data.roomId}?joinee=true&name=${joineeName}`
+				);
+			}
+		});
+
+		socket.on('new-meeting', (data) => {
+			console.log(data);
+			if (data.status == 'success') {
+				playMp3Sound();
+				navigate(`/meeting/${data.roomId}`, {
+					state: { isWaiting: false, data: data },
+				});
+			} else {
+				showToast(
+					'Error in creating meeting',
+					'error'
+				);
+			}
+		});
+
+		return () => {
+			socket.off('fetch-room-data');
+			socket.off('new-meeting');
+		};
+	}, [joineeName]);
 
 	const resetInputs = () => {
 		document
@@ -53,25 +79,6 @@ const NewMeeting = () => {
 	};
 
 	useEffect(() => {
-		onSocketEvent('room-data', (data) => {
-			if (data.message == 'Room not found') {
-				resetInputs();
-				setCode('');
-				showToast('No Meeting Found!', 'error');
-			} else {
-				console.log(joineeName);
-				navigate(
-					`/waiting/${data.roomId}?joinee=true&name=${joineeName}`
-				);
-			}
-		});
-
-		return () => {
-			socketOff('room-data');
-		};
-	}, [joineeName]);
-
-	useEffect(() => {
 		const interval = setInterval(() => {
 			setIndex((prev) =>
 				prev === words.length - 1 ? 0 : prev + 1
@@ -79,10 +86,6 @@ const NewMeeting = () => {
 		}, 2000);
 		return () => clearInterval(interval);
 	}, [words]);
-
-	useEffect(() => {
-		console.log(joineeName);
-	}, [joineeName]);
 
 	const handleCodeChange = (e) => {
 		if (e.target.value.length === 1) {
@@ -148,7 +151,7 @@ const NewMeeting = () => {
 	const handleCodeSubmit = () => {
 		if (joineeName) {
 			if (code.length == 4) {
-				emitSocketEvent('fetch-room-data', {
+				socket.emit('fetch-room-data', {
 					roomId: code,
 				});
 			} else {
@@ -160,49 +163,26 @@ const NewMeeting = () => {
 	};
 
 	const createNewMeeting = () => {
-		const MeetingData = {
-			meetingId: uuidv4(),
-			roomId: Farzi.number.getNumber(4),
-			Joinee: [
-				{
-					name: joineeName,
-					peerId: peerId,
-				},
-			],
-			Host: joineeName,
+		const user = {
+			userId: userId,
+			name: joineeName,
+			roomId: String(Farzi.number.getNumber(4)),
+			socketId: socket.id,
+			peerId: peer.id,
+			isTalking: false,
+			isMuted: false,
+			isVideoCamOn: false,
+			isHost: true,
 		};
 
+		console.log(user);
+
 		if (joineeName) {
-			console.log(MeetingData);
-			emitSocketEvent(
-				'create-new-meeting',
-				MeetingData
-			);
+			socket.emit('create-new-meeting', user);
 		} else {
 			showToast('Please enter your name', 'error');
 		}
 	};
-
-	useEffect(() => {
-		onSocketEvent('new-meeting', (data) => {
-			console.log(data);
-			if (data.status == 'success') {
-				playMp3Sound();
-				navigate(`/meeting/${data.roomId}`, {
-					state: { isWaiting: false, data: data },
-				});
-			} else {
-				showToast(
-					'Error in creating meeting',
-					'error'
-				);
-			}
-		});
-
-		return () => {
-			socketOff('new-meeting');
-		};
-	}, []);
 
 	return (
 		<div className={styles.main}>

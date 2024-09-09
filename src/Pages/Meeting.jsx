@@ -24,29 +24,37 @@ import mediaDevices from 'media-devices';
 import { showToast } from '../Utils/toast';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/zoom.css';
-import useConnections from '../Components/useConnections.jsx';
 import { useLocation } from 'react-router-dom';
 import enterRoom from '../Assets/enter.mp3';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { useConnections } from './SocketPeerContext.jsx';
+import { createUserId } from '../Utils/helper.js';
 
 const Meeting = () => {
+	const { socket, peer } = useConnections();
+	const userId = createUserId();
+
 	const { id } = useParams();
+
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const [joinee, setJoinee] = useState(false);
+	const MeetingData = location.state.data;
 
-	const [MeetingData, setMeetingData] = useState(
-		location?.state?.data ?? {}
-	);
+	const [stream, setStream] = useState({
+		localAudioStream: null,
+		localVideoStream: null,
+		remoteAudioStream: null,
+		remoteVideoStream: null,
+	});
 
-	const { roomId, Host, Joinee, myId } =
-		MeetingData;
+	const { roomId, user } = MeetingData;
 
 	const [controls, setControls] = useState({
-		isMicMuted: false,
-		isVideoOff: false,
+		isTalking: false,
+		isMuted: false,
+		isVideoCamOn: false,
 		isCaptionsEnabled: false,
 		isTranslationEnabled: false,
 	});
@@ -58,84 +66,89 @@ const Meeting = () => {
 	const [videoStream, setVideoStream] =
 		useState(null);
 
-	const [pinnedMember, setPinnedMember] =
-		useState(null);
-
-	const call = async () => {
-		const mediaDevice =
-			await mediaDevices.getUserMedia({
-				video: true,
-				audio: true,
-			});
-	};
-
 	useEffect(() => {
-		console.log(MeetingData);
-		if (Object.keys(MeetingData).length != 0) {
-			Cookies.set('roomId', MeetingData.roomId);
-			Cookies.set(
-				'MeetingData',
-				JSON.stringify(MeetingData)
-			);
-		}
-
-		const roomId = Cookies.get('roomId') ?? '';
-
-		if (roomId != '' && roomId == id) {
-			if (MeetingData == {}) {
-				setIswaiting(false);
-				setMeetingData(
-					JSON.parse(Cookies.get('MeetingData'))
-				);
-				getMembers();
-			}
-		}
-		// } else {
-		// 	navigate('/meeting');
-		// }
-	}, []);
-
-	useEffect(() => {
-		onSocketEvent('join-meeting', (data) => {
-			if (data.status == 'success') {
-				playEnter();
-				setIswaiting(false);
-				showToast('Joined the meeting', 'success');
-			}
+		socket.on('add-to-room', (data) => {
+			console.log(data);
+			setMembers(data.members);
 		});
 
-		onSocketEvent('get-members', (data) => {
+		socket.on('new-user', (data) => {
+			console.log(data);
+			setMembers((prevMembers) => [
+				...prevMembers,
+				data.user,
+			]);
+		});
+
+		// socket.on('new-member', (data) => {
+		// 	console.log(data);
+		// 	setMembers((prevMembers) => [
+		// 		...prevMembers,
+		// 		data.user,
+		// 	]);
+		// });
+
+		socket.on('update-user-state', (data) => {
 			console.log(data);
 		});
 
 		return () => {
-			socketOff('join-meeting');
-			socketOff('get-members');
+			socket.off('add-to-room');
+			socket.off('update-user-state');
 		};
 	}, []);
 
-	const {
-		socketId,
-		peerId,
-		emitSocketEvent,
-		onSocketEvent,
-		onPeerEvent,
-		emitPeerEvent,
-		socketOff,
-	} = useConnections();
+	useEffect(() => {
+		if (Object.keys(MeetingData).length == 0) {
+			navigate('/meeting');
+		} else {
+			console.log(MeetingData);
+			socket.emit('add-to-room', {
+				roomId: String(MeetingData.roomId),
+				...MeetingData.user,
+			});
+		}
+	}, []);
+
+	// const addToCookies = () => {
+	// 	Cookies.set('roomId', MeetingData.roomId);
+	// 	Cookies.set(
+	// 		'MeetingData',
+	// 		JSON.stringify(MeetingData)
+	// 	);
+	// };
+
+	// const verifyRejoin = () => {
+	// 	const roomId = Cookies.get('roomId') ?? '';
+	// 	if (roomId != '') {
+	// 		navigate(`/meeting/${roomId}`, {
+	// 			state: { isWaiting: false },
+	// 		});
+	// 	}
+	// };
+
+	// const isRoomValid = () => {
+	// 	const roomId = id;
+	// 	if (roomId == '') {
+	// 		navigate('/meeting');
+	// 	} else if (Cookies.get('roomId') != roomId) {
+	// 		navigate('/meeting');
+	// 	} else if (Cookies.get('roomId') == roomId) {
+	// 		socket.emit('valid-room', { roomId });
+	// 	}
+	// };
 
 	const toggleMic = () => {
-		getMembers();
 		setControls((prevControls) => ({
 			...prevControls,
-			isMicMuted: !prevControls.isMicMuted,
+			isMuted: !prevControls.isMuted,
 		}));
 
 		if (audioStream) {
 			audioStream
 				.getAudioTracks()
 				.forEach((track) => {
-					track.enabled = !controls.isMicMuted;
+					track.enabled = !controls.isMuted;
 				});
 		}
 	};
@@ -143,14 +156,14 @@ const Meeting = () => {
 	const toggleVideo = () => {
 		setControls((prevControls) => ({
 			...prevControls,
-			isVideoOff: !prevControls.isVideoOff,
+			isVideoCamOn: !prevControls.isVideoCamOn,
 		}));
 
 		if (videoStream) {
 			videoStream
 				.getVideoTracks()
 				.forEach((track) => {
-					track.enabled = !controls.isVideoOff;
+					track.enabled = !controls.isVideoCamOn;
 				});
 		}
 	};
@@ -183,22 +196,20 @@ const Meeting = () => {
 		}
 	};
 
-	const getMembers = () => {
-		emitSocketEvent('get-members', {
-			roomId,
-		});
-	};
-
 	const RenderMembers = () => {
-		return members?.map((member, index) => {
-			return member.id == myId ? (
+		if (!Array.isArray(members)) {
+			return null;
+		}
+
+		return members.map((member, index) => {
+			return member.id == userId ? (
 				<div
-					key={member._id}
+					key={member.id}
 					className={styles.card}
 				>
 					<div className={styles.actionButtons}>
 						<div className={styles.button}>
-							{controls.isMicMuted ? (
+							{controls.isMuted ? (
 								<IoMicOffSharp />
 							) : (
 								<IoMicSharp />
@@ -213,7 +224,7 @@ const Meeting = () => {
 				</div>
 			) : (
 				<div
-					key={member._id}
+					key={member.id}
 					className={styles.card}
 				>
 					<div className={styles.actionButtons}>
@@ -226,13 +237,6 @@ const Meeting = () => {
 							) : (
 								<IoMicSharp />
 							)}
-						</div>
-						<div
-							className={styles.button}
-							ref={MenuRef}
-							{...anchorProps}
-						>
-							<IoMdMore />
 						</div>
 					</div>
 					<InitialsAvatar
@@ -255,14 +259,14 @@ const Meeting = () => {
 			<div className={styles.titleBar}>
 				<p className={styles.title}>Meeting Title</p>
 				<p className={styles.membersCount}>
-					{members.length} Participants
+					{0} Participants
 				</p>
 			</div>
 			<div className={styles.cardWrapper}>
 				<RenderMembers />
 			</div>
 			<div className={styles.bottomNavbar}>
-				{controls.isMicMuted ? (
+				{controls.isMuted ? (
 					<div
 						className={styles.unfocus}
 						onClick={toggleMic}

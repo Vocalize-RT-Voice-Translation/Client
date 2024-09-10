@@ -15,7 +15,6 @@ import Technology from './Pages/Technology.jsx';
 import Developers from './Pages/Developers.jsx';
 import Translate from './Pages/Translate.jsx';
 import Meeting from './Pages/Meeting.jsx';
-import Test from './Pages/Test.jsx';
 import NewMeeting from './Pages/NewMeeting.jsx';
 import { RecoilRoot } from 'recoil';
 import WaitingArea from './Pages/WaitingArea.jsx';
@@ -62,10 +61,6 @@ ReactDOM.createRoot(
 							<Route
 								path='/waiting/:id'
 								element={<WaitingArea />}
-							/>
-							<Route
-								path='/test'
-								element={<Test />}
 							/>
 							<Route
 								path='*'

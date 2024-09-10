@@ -18,21 +18,20 @@ import { GoPersonAdd } from 'react-icons/go';
 import { BsCcCircle } from 'react-icons/bs';
 import { AiOutlineLogout } from 'react-icons/ai';
 import { BsTranslate } from 'react-icons/bs';
-import { IoMdMore } from 'react-icons/io';
 import { IoMdSettings } from 'react-icons/io';
-import mediaDevices from 'media-devices';
 import { showToast } from '../Utils/toast';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/zoom.css';
 import { useLocation } from 'react-router-dom';
-import enterRoom from '../Assets/enter.mp3';
-import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useConnections } from './SocketPeerContext.jsx';
 import { createUserId } from '../Utils/helper.js';
+import enterSound from '../Assets/enter.mp3';
+import exitSound from '../Assets/leave.mp3';
 
 const Meeting = () => {
 	const { socket, peer } = useConnections();
+
 	const userId = createUserId();
 
 	const { id } = useParams();
@@ -66,37 +65,50 @@ const Meeting = () => {
 	const [videoStream, setVideoStream] =
 		useState(null);
 
+	const playSound = (sound) => {
+		const audioData = new Audio(sound);
+		audioData.play();
+	};
+
 	useEffect(() => {
 		socket.on('add-to-room', (data) => {
-			console.log(data);
-			setMembers(data.members);
+			if (data.status === 'success') {
+				setMembers(data.members);
+			} else {
+				console.error(data.message);
+			}
 		});
 
 		socket.on('new-user', (data) => {
-			console.log(data);
-			setMembers((prevMembers) => [
-				...prevMembers,
-				data.user,
-			]);
+			if (data.status === 'success') {
+				setMembers(data.members);
+				showToast(`User joined the room!`, 'success');
+				playSound(enterSound);
+			} else {
+				console.error(data.message);
+			}
 		});
 
-		// socket.on('new-member', (data) => {
-		// 	console.log(data);
-		// 	setMembers((prevMembers) => [
-		// 		...prevMembers,
-		// 		data.user,
-		// 	]);
-		// });
-
-		socket.on('update-user-state', (data) => {
-			console.log(data);
+		socket.on('leave-room', (data) => {
+			if (data.status === 'success') {
+				setMembers((prevMembers) =>
+					prevMembers.filter(
+						(member) => member.id !== data.userId
+					)
+				);
+				showToast(data.message, 'blank');
+				playSound(exitSound);
+			} else {
+				console.error(data.message);
+			}
 		});
 
 		return () => {
+			socket.off('leave-room');
+			socket.off('new-user');
 			socket.off('add-to-room');
-			socket.off('update-user-state');
 		};
-	}, []);
+	}, [socket]);
 
 	useEffect(() => {
 		if (Object.keys(MeetingData).length == 0) {
@@ -196,6 +208,14 @@ const Meeting = () => {
 		}
 	};
 
+	const leaveRoom = () => {
+		socket.emit('leave-room', {
+			roomId: String(MeetingData.roomId),
+			userId: userId,
+		});
+		navigate('/meeting');
+	};
+
 	const RenderMembers = () => {
 		if (!Array.isArray(members)) {
 			return null;
@@ -249,17 +269,12 @@ const Meeting = () => {
 		});
 	};
 
-	const playEnter = () => {
-		const audio = new Audio(enterRoom);
-		audio.play();
-	};
-
 	return (
 		<div className={styles.main}>
 			<div className={styles.titleBar}>
 				<p className={styles.title}>Meeting Title</p>
 				<p className={styles.membersCount}>
-					{0} Participants
+					{members.length} Participants
 				</p>
 			</div>
 			<div className={styles.cardWrapper}>
@@ -328,7 +343,10 @@ const Meeting = () => {
 						<BsTranslate />
 					</div>
 				)}
-				<div className={styles.hangUp}>
+				<div
+					className={styles.hangUp}
+					onClick={leaveRoom}
+				>
 					<AiOutlineLogout />
 				</div>
 				<div className={styles.icon}>

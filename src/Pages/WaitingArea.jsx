@@ -202,6 +202,7 @@ const WaitingArea = () => {
 	const joinIn = () => {
 		const data = {
 			roomId: String(roomId),
+			host: roomDetails.host,
 			user: {
 				id: userId,
 				name: joineeDetails.name,
@@ -209,7 +210,7 @@ const WaitingArea = () => {
 				socketId: socket.id,
 				peerId: peer.id,
 				isTalking: false,
-				isMuted: false,
+				isMuted: true,
 				isVideoCamOn: false,
 				isHost: false,
 			},

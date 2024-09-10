@@ -170,12 +170,10 @@ const NewMeeting = () => {
 			socketId: socket.id,
 			peerId: peer.id,
 			isTalking: false,
-			isMuted: false,
+			isMuted: true,
 			isVideoCamOn: false,
 			isHost: true,
 		};
-
-		console.log(user);
 
 		if (joineeName) {
 			socket.emit('create-new-meeting', user);

@@ -10,7 +10,9 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@ant-design/icons": "^5.4.0",
 		"@szhsin/react-menu": "^4.2.2",
+		"antd": "^5.20.6",
 		"axios": "^1.7.7",
 		"farzi.js": "^1.0.6",
 		"gsap": "^3.12.5",

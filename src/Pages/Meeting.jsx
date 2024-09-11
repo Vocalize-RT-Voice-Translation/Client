@@ -3,9 +3,11 @@ import React, {
 	useEffect,
 	useState,
 } from 'react';
-import { useParams } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import {
+	useParams,
+	useLocation,
+	useNavigate,
+} from 'react-router-dom';
 
 // SCSS
 import styles from '../Styles/Meeting.module.scss';
@@ -23,10 +25,11 @@ import {
 import { GoPersonAdd } from 'react-icons/go';
 import { BsCcCircle } from 'react-icons/bs';
 import { AiOutlineLogout } from 'react-icons/ai';
-import { BsTranslate } from 'react-icons/bs';
+import {
+	BsTranslate,
+	BsStars,
+} from 'react-icons/bs';
 import { IoMdSettings } from 'react-icons/io';
-import { CiBoxList } from 'react-icons/ci';
-import { BsStars } from 'react-icons/bs';
 import { PiDevices } from 'react-icons/pi';
 
 // Imports
@@ -40,7 +43,7 @@ import enterSound from '../Assets/enter.mp3';
 import exitSound from '../Assets/leave.mp3';
 
 // Ant Design Component
-import { Button, Modal, Switch } from 'antd';
+import { Modal, Switch } from 'antd';
 import {
 	CheckOutlined,
 	CloseOutlined,
@@ -111,51 +114,24 @@ const Meeting = () => {
 		audioData.play();
 	};
 
-	const makePeerCall = () => {
-		const call = peer.call(
-			'remote-peer-id',
-			stream.localStream
-		);
-		call.on('stream', (remoteStream) => {
-			setStream((prevStream) => ({
-				...prevStream,
-				remoteStream,
-			}));
-		});
-	};
-
-	const [audioDevices, setAudioDevices] = useState(
-		[]
-	);
-	const [videoDevices, setVideoDevices] = useState(
-		[]
-	);
-
-	const [
-		audioOutputDevices,
-		setAudioOutputDevices,
-	] = useState([]);
-
-	const [
-		selectedAudioDevice,
-		setSelectedAudioDevice,
-	] = useState('');
-
-	const [
-		selectedAudioOutputDevice,
-		setSelectedAudioOutputDevice,
-	] = useState('');
-
-	const [
-		selectedVideoDevice,
-		setSelectedVideoDevice,
-	] = useState('');
-
 	useEffect(() => {
 		getVideoDevices();
 		getAudioDevices();
 		getAudioOutputDevices();
 	}, []);
+
+	const [settingsConfig, setSettingsConfig] =
+		useState({
+			audioDeviceList: [],
+			videoDeviceList: [],
+			audioOutputDeviceList: [],
+			selectedAudioDevice: '',
+			selectedVideoDevice: '',
+			selectedAudioOutputDevice: '',
+			isCaptionsEnabled: false,
+			isTranslationEnabled: false,
+			speakerLanguage: 'English',
+		});
 
 	const getAudioDevices = async () => {
 		navigator.mediaDevices
@@ -164,13 +140,18 @@ const Meeting = () => {
 				const audioDevices = devices.filter(
 					(device) => device.kind === 'audioinput'
 				);
-				console.log(audioDevices);
 				const getLabels = audioDevices.map(
 					(device) => device.label
 				);
-				setAudioDevices(getLabels);
+				setSettingsConfig((prevConfig) => ({
+					...prevConfig,
+					audioDeviceList: getLabels,
+				}));
 				if (getLabels.length > 0) {
-					setSelectedAudioDevice(getLabels[0]);
+					setSettingsConfig((prevConfig) => ({
+						...prevConfig,
+						selectedAudioDevice: getLabels[0],
+					}));
 				}
 			});
 	};
@@ -182,13 +163,18 @@ const Meeting = () => {
 				const audioOutputDevices = devices.filter(
 					(device) => device.kind === 'audiooutput'
 				);
-				console.log(audioOutputDevices);
 				const getLabels = audioOutputDevices.map(
 					(device) => device.label
 				);
-				setAudioOutputDevices(getLabels);
+				setSettingsConfig((prevConfig) => ({
+					...prevConfig,
+					audioOutputDeviceList: getLabels,
+				}));
 				if (getLabels.length > 0) {
-					setSelectedAudioOutputDevice(getLabels[0]);
+					setSettingsConfig((prevConfig) => ({
+						...prevConfig,
+						selectedAudioOutputDevice: getLabels[0],
+					}));
 				}
 			});
 	};
@@ -197,96 +183,37 @@ const Meeting = () => {
 		navigator.mediaDevices
 			.enumerateDevices()
 			.then((devices) => {
-				console.log(devices);
 				const videoDevices = devices.filter(
 					(device) => device.kind === 'videoinput'
 				);
 				const getLabels = videoDevices.map(
 					(device) => device.label
 				);
-				setVideoDevices(getLabels);
+				setSettingsConfig((prevConfig) => ({
+					...prevConfig,
+					videoDeviceList: getLabels,
+				}));
 				if (getLabels.length > 0) {
-					setSelectedAudioDevice(getLabels[0]);
+					setSettingsConfig((prevConfig) => ({
+						...prevConfig,
+						selectedVideoDevice: getLabels[0],
+					}));
 				}
 			});
 	};
 
-	const getMediaStream = async (
-		audioDeviceId,
-		videoDeviceId
-	) => {
+	const checkPermission = async () => {
 		try {
-			const constraints = {
-				audio: audioDeviceId
-					? { deviceId: { exact: audioDeviceId } }
-					: true,
-				video: videoDeviceId
-					? { deviceId: { exact: videoDeviceId } }
-					: true,
-			};
-			const stream =
-				await navigator.mediaDevices.getUserMedia(
-					constraints
-				);
-			setAudioStream(stream);
-			setVideoStream(stream);
-			console.log(stream);
-		} catch (error) {
-			if (error.name === 'OverconstrainedError') {
-				console.error(
-					'OverconstrainedError: The specified device constraints cannot be satisfied.',
-					error
-				);
-				// Fallback to default devices
-				try {
-					const fallbackStream =
-						await navigator.mediaDevices.getUserMedia({
-							audio: true,
-							video: true,
-						});
-					setAudioStream(fallbackStream);
-					setVideoStream(fallbackStream);
-					console.log(fallbackStream);
-				} catch (fallbackError) {
-					console.error(
-						'Error accessing fallback media devices.',
-						fallbackError
-					);
-				}
-			} else {
-				console.error(
-					'Error accessing media devices.',
-					error
-				);
-			}
+			await navigator.permissions.query({
+				name: 'camera',
+			});
+			await navigator.permissions.query({
+				name: 'microphone',
+			});
+		} catch (err) {
+			console.error(err);
 		}
 	};
-
-	useEffect(() => {
-		if (
-			selectedAudioDevice &&
-			selectedVideoDevice
-		) {
-			console.log('here');
-			getMediaStream(
-				selectedAudioDevice,
-				selectedVideoDevice
-			);
-		}
-
-		return () => {
-			if (audioStream) {
-				audioStream
-					.getTracks()
-					.forEach((track) => track.stop());
-			}
-			if (videoStream) {
-				videoStream
-					.getTracks()
-					.forEach((track) => track.stop());
-			}
-		};
-	}, [selectedAudioDevice, selectedVideoDevice]);
 
 	useEffect(() => {
 		socket.on('add-to-room', (data) => {
@@ -410,10 +337,16 @@ const Meeting = () => {
 				!prevControls.isCaptionsEnabled,
 		}));
 
+		setSettingsConfig((prevConfig) => ({
+			...prevConfig,
+			isCaptionsEnabled:
+				!prevConfig.isCaptionsEnabled,
+		}));
+
 		if (controls.isCaptionsEnabled) {
-			showToast('Captions disabled', 'blank');
+			showToast('Captions disabled', 'success');
 		} else {
-			showToast('Captions enabled', 'blank');
+			showToast('Captions enabled', 'success');
 		}
 	};
 
@@ -423,11 +356,16 @@ const Meeting = () => {
 			isTranslationEnabled:
 				!prevControls.isTranslationEnabled,
 		}));
+		setSettingsConfig((prevConfig) => ({
+			...prevConfig,
+			isTranslationEnabled:
+				!prevConfig.isTranslationEnabled,
+		}));
 
 		if (controls.isTranslationEnabled) {
-			showToast('Translation disabled', 'blank');
+			showToast('Translation disabled', 'success');
 		} else {
-			showToast('Translation enabled', 'blank');
+			showToast('Translation enabled', 'success');
 		}
 	};
 
@@ -437,6 +375,36 @@ const Meeting = () => {
 			userId: userId,
 		});
 		navigate('/meeting');
+	};
+
+	const shareRoom = async () => {
+		const fallbackShare = () => {
+			const message = `${MeetingData.host} has invited you to join the meeting. Use ${MeetingData.roomId} as the code to join the meeting. http://localhost:5173/meeting`;
+			navigator.clipboard.writeText(message);
+			showToast(
+				'Invite copied to clipboard',
+				'success'
+			);
+		};
+		if (navigator.share) {
+			const shareData = {
+				title: 'Video Meeting Invite',
+				text: `${MeetingData.host} has invited you to join the meeting. Use ${MeetingData.roomId} as the code to join the meeting.`,
+				url: `http://localhost:5173/meeting`,
+			};
+
+			try {
+				await navigator.share(shareData);
+				showToast(
+					'Invite Message Generated',
+					'success'
+				);
+			} catch (err) {
+				showToast('Error Sharing Invite', 'error');
+			}
+		} else {
+			fallbackShare();
+		}
 	};
 
 	const RenderMembers = () => {
@@ -493,15 +461,12 @@ const Meeting = () => {
 	};
 
 	const Settings = ({
-		videoDevice,
-		audioDevice,
-		audioOutputDevice,
-		audioDeviceList,
-		videoDeviceList,
-		audioOutputDeviceList,
-		selectedAudioDevice,
-		selectedVideoDevice,
-		selectedAudioOutputDevice,
+		settingsConfig,
+		selectMic,
+		selectVideo,
+		selectSpeaker,
+		isCaptionsEnabled,
+		isTranslationEnabled,
 		speakerLanguage,
 	}) => {
 		const leftItems = [
@@ -518,12 +483,6 @@ const Meeting = () => {
 				icon: <BsTranslate />,
 			},
 		];
-
-		const [languageConfig, setLanguageConfig] =
-			useState({
-				speaker: 'English',
-				listener: 'Hindi',
-			});
 
 		return (
 			<div className={styles.modalSettings}>
@@ -564,18 +523,22 @@ const Meeting = () => {
 									id=''
 									onChange={(e) => {
 										console.log(e.target.value);
-										audioDevice(e.target.value);
+										selectMic(e.target.value);
 									}}
-									value={selectedAudioDevice}
+									value={
+										settingsConfig.selectedAudioDevice
+									}
 								>
-									{audioDeviceList.map((device) => (
-										<option
-											key={device}
-											value={device}
-										>
-											{device}
-										</option>
-									))}
+									{settingsConfig.audioDeviceList.map(
+										(device) => (
+											<option
+												key={device}
+												value={device}
+											>
+												{device}
+											</option>
+										)
+									)}
 								</select>
 							</div>
 							<div className={styles.audioWrapper}>
@@ -585,18 +548,22 @@ const Meeting = () => {
 									id=''
 									onChange={(e) => {
 										console.log(e.target.value);
-										audioOutputDevice(e.target.value);
+										selectSpeaker(e.target.value);
 									}}
-									value={selectedAudioOutputDevice}
+									value={
+										settingsConfig.selectedAudioOutputDevice
+									}
 								>
-									{audioOutputDeviceList.map((device) => (
-										<option
-											key={device}
-											value={device}
-										>
-											{device}
-										</option>
-									))}
+									{settingsConfig.audioOutputDeviceList.map(
+										(device) => (
+											<option
+												key={device}
+												value={device}
+											>
+												{device}
+											</option>
+										)
+									)}
 								</select>
 							</div>
 							<div className={styles.videoWrapper}>
@@ -604,20 +571,24 @@ const Meeting = () => {
 								<select
 									name=''
 									id=''
-									value={selectedVideoDevice}
+									value={
+										setSettingsConfig.selectedVideoDevice
+									}
 									onChange={(e) => {
 										console.log(e.target.value);
-										videoDevice(e.target.value);
+										selectVideo(e.target.value);
 									}}
 								>
-									{videoDeviceList.map((device) => (
-										<option
-											key={device}
-											value={device}
-										>
-											{device}
-										</option>
-									))}
+									{settingsConfig.videoDeviceList.map(
+										(device) => (
+											<option
+												key={device}
+												value={device}
+											>
+												{device}
+											</option>
+										)
+									)}
 								</select>
 							</div>
 						</div>
@@ -641,9 +612,24 @@ const Meeting = () => {
 									className={styles.switch}
 									checkedChildren={<CheckOutlined />}
 									unCheckedChildren={<CloseOutlined />}
-									defaultChecked={false}
+									defaultChecked={
+										settingsConfig.isCaptionsEnabled
+									}
 									onChange={(checked) => {
 										console.log(checked);
+										if (checked) {
+											showToast(
+												'Captions Enabled',
+												'success'
+											);
+											isCaptionsEnabled(true);
+										} else {
+											showToast(
+												'Captions Disabled',
+												'success'
+											);
+											isCaptionsEnabled(false);
+										}
 									}}
 								/>
 							</div>
@@ -665,9 +651,24 @@ const Meeting = () => {
 										className={styles.switch}
 										checkedChildren={<CheckOutlined />}
 										unCheckedChildren={<CloseOutlined />}
-										defaultChecked={false}
+										defaultChecked={
+											settingsConfig.isTranslationEnabled
+										}
 										onChange={(checked) => {
 											console.log(checked);
+											if (checked) {
+												showToast(
+													'Translation Enabled',
+													'success'
+												);
+												isTranslationEnabled(true);
+											} else {
+												showToast(
+													'Translation Disabled',
+													'success'
+												);
+												isTranslationEnabled(false);
+											}
 										}}
 									/>
 								</div>
@@ -677,18 +678,12 @@ const Meeting = () => {
 										<select
 											name=''
 											id=''
-											value={languageConfig.speaker}
+											value={settingsConfig.speakerLanguage}
 											onChange={(e) => {
 												if (e.target.value === 'Hindi') {
-													setLanguageConfig({
-														speaker: 'Hindi',
-														listener: 'English',
-													});
+													speakerLanguage('Hindi');
 												} else {
-													setLanguageConfig({
-														speaker: 'English',
-														listener: 'Hindi',
-													});
+													speakerLanguage('English');
 												}
 											}}
 										>
@@ -703,18 +698,17 @@ const Meeting = () => {
 										<select
 											name=''
 											id=''
-											value={languageConfig.listener}
+											value={
+												settingsConfig.speakerLanguage ==
+												'English'
+													? 'Hindi'
+													: 'English'
+											}
 											onChange={(e) => {
 												if (e.target.value === 'Hindi') {
-													setLanguageConfig({
-														speaker: 'English',
-														listener: 'Hindi',
-													});
+													speakerLanguage('English');
 												} else {
-													setLanguageConfig({
-														speaker: 'Hindi',
-														listener: 'English',
-													});
+													speakerLanguage('Hindi');
 												}
 											}}
 										>
@@ -758,23 +752,51 @@ const Meeting = () => {
 				width='50%'
 			>
 				<Settings
-					audioDevice={(device) => {
-						setSelectedAudioDevice(device);
+					settingsConfig={settingsConfig}
+					selectMic={(data) => {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							selectedAudioDevice: data,
+						}));
 					}}
-					videoDevice={(device) => {
-						setSelectedVideoDevice(device);
+					selectVideo={(data) => {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							selectedVideoDevice: data,
+						}));
 					}}
-					audioDeviceList={audioDevices}
-					videoDeviceList={videoDevices}
-					selectedAudioDevice={selectedAudioDevice}
-					selectedVideoDevice={selectedVideoDevice}
-					audioOutputDevice={(device) => {
-						setSelectedAudioOutputDevice(device);
+					selectSpeaker={(data) => {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							selectedAudioOutputDevice: data,
+						}));
 					}}
-					audioOutputDeviceList={audioOutputDevices}
-					selectedAudioOutputDevice={
-						selectedAudioOutputDevice
-					}
+					isCaptionsEnabled={(data) => {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							isCaptionsEnabled: data,
+						}));
+						setControls((prevControls) => ({
+							...prevControls,
+							isCaptionsEnabled: data,
+						}));
+					}}
+					isTranslationEnabled={(data) => {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							isTranslationEnabled: data,
+						}));
+						setControls((prevControls) => ({
+							...prevControls,
+							isTranslationEnabled: data,
+						}));
+					}}
+					speakerLanguage={(data) => {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							speakerLanguage: data,
+						}));
+					}}
 				/>
 			</Modal>
 
@@ -859,7 +881,10 @@ const Meeting = () => {
 					<AiOutlineLogout />
 				</div>
 
-				<div className={styles.icon}>
+				<div
+					className={styles.icon}
+					onClick={shareRoom}
+				>
 					<GoPersonAdd />
 				</div>
 

@@ -200,24 +200,28 @@ const WaitingArea = () => {
 	};
 
 	const joinIn = () => {
-		const data = {
-			roomId: String(roomId),
-			host: roomDetails.host,
-			user: {
-				id: userId,
-				name: joineeDetails.name,
+		if (roomDetails.membersCount <= 1) {
+			const data = {
 				roomId: String(roomId),
-				socketId: socket.id,
-				peerId: peer.id,
-				isTalking: false,
-				isMuted: true,
-				isVideoCamOn: false,
-				isHost: false,
-			},
-		};
-		navigate(`/meeting/${roomId}`, {
-			state: { isWaiting: false, data: data },
-		});
+				host: roomDetails.host,
+				user: {
+					id: userId,
+					name: joineeDetails.name,
+					roomId: String(roomId),
+					socketId: socket.id,
+					peerId: peer.id,
+					isTalking: false,
+					isMuted: true,
+					isVideoCamOn: false,
+					isHost: false,
+				},
+			};
+			navigate(`/meeting/${roomId}`, {
+				state: { isWaiting: false, data: data },
+			});
+		} else {
+			showToast('Meeting is full', 'error');
+		}
 	};
 
 	return (

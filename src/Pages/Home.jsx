@@ -6,13 +6,11 @@ import FeatureOne from '../Components/FeatureOne.jsx';
 import LocomotiveScroll from 'locomotive-scroll';
 import Meet from '../Components/Meet.jsx';
 import Animation from '../Components/Animation.jsx';
-import { useConnections } from './SocketPeerContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
-	const { socket, peer } = useConnections();
-
+	const navigate = useNavigate();
 	useEffect(() => {
-		console.log(socket.id);
 		const locomotiveScroll = new LocomotiveScroll({
 			smooth: true,
 			smoothMobile: true,
@@ -66,7 +64,12 @@ const Home = () => {
 							section.
 						</p>
 						<div className={styles.buttonWrapper}>
-							<div className={styles.button}>
+							<div
+								className={styles.button}
+								onClick={() => {
+									navigate('/meeting');
+								}}
+							>
 								Try Vocalize
 							</div>
 							<p>Watch the Demo</p>

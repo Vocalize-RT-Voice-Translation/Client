@@ -104,7 +104,7 @@ img {
 	}
 
 	.newMeetingButton {
-		height: 30vh;
+		height: 35vh;
 		background-color: white;
 		width: 100%;
 		display: flex;
@@ -182,6 +182,197 @@ img {
 			&:hover {
 				cursor: pointer;
 				transform: scale(1.05);
+			}
+		}
+	}
+}
+
+@media (min-width: 200px) and (max-width: 1300px) {
+	.main {
+		min-height: 100vh;
+		width: 100%;
+		background-color: var(--bg);
+		padding: 5rem 0 0 0;
+		position: relative;
+
+		> .heading {
+			height: 10vh;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+
+			> h2 {
+				font-size: 6vw;
+				color: white;
+				margin-bottom: 0.75rem;
+			}
+
+			> p {
+				font-size: 4vw;
+				color: #ffffffac;
+			}
+		}
+
+		> .animation {
+			height: 40vh;
+			margin: 5rem 0 0 0;
+			width: 100%;
+			display: flex;
+			align-items: center;
+
+			@keyframes moveDottedLine {
+				0% {
+					background-position: 0 0;
+				}
+				100% {
+					background-position: 2rem 0;
+				}
+			}
+
+			> .linearWrapper {
+				width: 30%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				gap: 2rem;
+
+				.linear {
+					width: 100%;
+					height: 0.2rem;
+					background: linear-gradient(
+							90deg,
+							white 50%,
+							transparent 50%
+						)
+						repeat-x;
+					background-size: 2rem 0.5rem;
+					animation: moveDottedLine 0.25s linear
+						infinite;
+
+					&:nth-child(1) {
+						animation-duration: 0.35s;
+					}
+
+					&:nth-child(2) {
+						animation-duration: 0.25s;
+					}
+
+					&:nth-child(3) {
+						animation-duration: 0.35s;
+					}
+				}
+			}
+
+			> .language {
+				width: 40%;
+				overflow: hidden;
+
+				> img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+					border-radius: 1rem;
+				}
+			}
+
+			> .vocalize {
+				width: 40%;
+				height: 40%;
+				overflow: hidden;
+
+				> img {
+					width: 100%;
+					height: 100%;
+					object-fit: contain;
+					border-radius: 1rem;
+				}
+			}
+		}
+
+		.newMeetingButton {
+			height: 30vh;
+			background-color: white;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+			margin: 5rem 0 0 0;
+			border-top-left-radius: 7rem;
+			border-top-right-radius: 7rem;
+			position: absolute;
+			bottom: 0;
+			overflow: hidden;
+			gap: 1.25rem;
+
+			&::before {
+				content: '';
+				position: absolute;
+				top: 100%;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-color: orange;
+				transition: top 0.5s
+					cubic-bezier(0.86, 0.04, 0.18, 0.4);
+			}
+
+			&:hover {
+				&::before {
+					top: 0;
+				}
+
+				> .button {
+					background-color: white;
+
+					> p {
+						color: orange;
+					}
+
+					> svg {
+						color: orange;
+					}
+				}
+			}
+
+			> img {
+				position: relative;
+				width: 25%;
+			}
+
+			> .button {
+				padding: 1rem 3rem;
+				background-color: orange;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 4rem;
+				position: relative;
+				transition: all 0.5s
+					cubic-bezier(0.86, 0.04, 0.18, 0.4);
+
+				> p {
+					font-size: 1.5rem;
+					color: white;
+					transition: all 0.5s
+						cubic-bezier(0.86, 0.04, 0.18, 0.4);
+				}
+
+				> svg {
+					margin-left: 1rem;
+					font-size: 2rem;
+					color: white;
+					transition: all 0.5s
+						cubic-bezier(0.86, 0.04, 0.18, 0.4);
+				}
+
+				&:hover {
+					cursor: pointer;
+					transform: scale(1.05);
+				}
 			}
 		}
 	}

@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styles from './Styles/Animation.module.scss';
 import english from '../Assets/hello.png';
 import hindi from '../Assets/namaste.jpg';
 import vocalize from '../Assets/vocalize-white.png';
 import logoBlack from '../Assets/vocalize-black.png';
 import { IoIosArrowDropright } from 'react-icons/io';
+import { useNavigate } from 'react-router-dom';
 
 const Animation = () => {
+	const navigate = useNavigate();
 	return (
 		<div className={styles.main}>
 			<div className={styles.heading}>
@@ -54,7 +56,12 @@ const Animation = () => {
 					src={logoBlack}
 					alt=''
 				/>
-				<div className={styles.button}>
+				<div
+					className={styles.button}
+					onClick={() => {
+						navigate('/meeting');
+					}}
+				>
 					<p>Try Vocalize Now</p>
 					<IoIosArrowDropright />
 				</div>

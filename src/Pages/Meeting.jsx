@@ -1,7 +1,9 @@
 // React Essentials
 import React, {
+	useCallback,
 	useEffect,
 	useState,
+	useRef,
 } from 'react';
 import {
 	useParams,
@@ -52,6 +54,8 @@ import {
 const Meeting = () => {
 	const { socket, peer } = useConnections();
 
+	const myVideo = useRef();
+
 	const userId = createUserId();
 
 	const { id } = useParams();
@@ -62,13 +66,33 @@ const Meeting = () => {
 	const MeetingData = location.state.data;
 
 	const [stream, setStream] = useState({
-		localAudioStream: null,
-		localVideoStream: null,
-		remoteAudioStream: null,
-		remoteVideoStream: null,
+		localStream: null,
+		remoteStream: null,
 	});
 
 	const { roomId, user } = MeetingData;
+
+	const [modalWidth, setModalWidth] =
+		useState('50%');
+
+	useEffect(() => {
+		const getWindowWidth = () => {
+			setModalWidth(
+				window.innerWidth < 768 ? '100%' : '50%'
+			);
+		};
+		getWindowWidth();
+		window.addEventListener(
+			'resize',
+			getWindowWidth
+		);
+		return () => {
+			window.removeEventListener(
+				'resize',
+				getWindowWidth
+			);
+		};
+	}, []);
 
 	const [controls, setControls] = useState({
 		isTalking: false,
@@ -109,10 +133,10 @@ const Meeting = () => {
 	const [videoStream, setVideoStream] =
 		useState(null);
 
-	const playSound = (sound) => {
+	const playSound = useCallback((sound) => {
 		const audioData = new Audio(sound);
 		audioData.play();
-	};
+	}, []);
 
 	useEffect(() => {
 		getVideoDevices();
@@ -215,7 +239,29 @@ const Meeting = () => {
 		}
 	};
 
+	const getLocalStream = async () => {
+		const localStream =
+			await navigator.mediaDevices.getUserMedia({
+				video: true,
+				audio: true,
+			});
+
+		setStream((prevStream) => ({
+			...prevStream,
+			localStream: localStream,
+		}));
+	};
+
 	useEffect(() => {
+		if (stream.localStream) {
+			console.log('Stream', stream.localStream);
+			myVideo.current.srcObject = stream.localStream;
+		}
+	}, []);
+
+	useEffect(() => {
+		getLocalStream();
+
 		socket.on('add-to-room', (data) => {
 			if (data.status === 'success') {
 				setMembers(data.members);
@@ -418,43 +464,78 @@ const Meeting = () => {
 					key={member.id}
 					className={styles.card}
 				>
-					<div className={styles.actionButtons}>
-						<div className={styles.button}>
-							{controls.isMuted ? (
-								<IoMicOffSharp />
-							) : (
-								<IoMicSharp />
-							)}
+					<div className={styles.overlay}>
+						<div className={styles.actionButtons}>
+							<div className={styles.button}>
+								{controls.isMuted ? (
+									<IoMicOffSharp />
+								) : (
+									<IoMicSharp />
+								)}
+							</div>
+							<div className={styles.button}>
+								{controls.isVideoCamOn ? (
+									<MdVideocam />
+								) : (
+									<MdVideocamOff />
+								)}
+							</div>
 						</div>
+						<p>{member.name}</p>
 					</div>
-					<InitialsAvatar
-						className={styles.profile}
-						name={member.name}
-					/>
-					<p>{member.name}</p>
+					{controls.isVideoCamOn ? (
+						<div className={styles.videoWrapper}>
+							<video
+								src=''
+								ref={myVideo}
+							></video>
+						</div>
+					) : (
+						<div className={styles.videoOff}>
+							<InitialsAvatar
+								className={styles.profile}
+								name={member.name}
+							/>
+						</div>
+					)}
 				</div>
 			) : (
 				<div
 					key={member.id}
 					className={styles.card}
 				>
-					<div className={styles.actionButtons}>
-						<div
-							className={styles.button}
-							data-disable-hover='true'
-						>
-							{member.isMuted ? (
-								<IoMicOffSharp />
-							) : (
-								<IoMicSharp />
-							)}
+					<div className={styles.overlay}>
+						<div className={styles.actionButtons}>
+							<div className={styles.button}>
+								{member.isMuted ? (
+									<IoMicOffSharp />
+								) : (
+									<IoMicSharp />
+								)}
+							</div>
+							<div className={styles.button}>
+								{member.isVideoCamOn ? (
+									<MdVideocam />
+								) : (
+									<MdVideocamOff />
+								)}
+							</div>
 						</div>
+						<p>{member.name}</p>
 					</div>
-					<InitialsAvatar
-						className={styles.profile}
-						name={member.name}
-					/>
-					<p>{member.name}</p>
+					{member.isVideoCamOn ? (
+						<div className={styles.videoWrapper}>
+							<video src=''></video>
+							<p>This is Video Screen</p>
+						</div>
+					) : (
+						<div className={styles.videoOff}>
+							<InitialsAvatar
+								className={styles.profile}
+								name={member.name}
+							/>
+						</div>
+					)}
 				</div>
 			);
 		});
@@ -547,7 +628,7 @@ const Meeting = () => {
 									name=''
 									id=''
 									onChange={(e) => {
-										console.log(e.target.value);
+										e.preventDefault();
 										selectSpeaker(e.target.value);
 									}}
 									value={
@@ -575,7 +656,7 @@ const Meeting = () => {
 										setSettingsConfig.selectedVideoDevice
 									}
 									onChange={(e) => {
-										console.log(e.target.value);
+										e.preventDefault();
 										selectVideo(e.target.value);
 									}}
 								>
@@ -749,7 +830,7 @@ const Meeting = () => {
 				closable={true}
 				centered
 				footer={null}
-				width='50%'
+				width={modalWidth}
 			>
 				<Settings
 					settingsConfig={settingsConfig}
@@ -805,12 +886,18 @@ const Meeting = () => {
 					Video Call by {MeetingData.host}
 				</p>
 				<p className={styles.membersCount}>
-					{members.length} Participants
+					{members.length}{' '}
+					{members.length > 1 ? 'Members' : 'Member'}
 				</p>
 			</div>
 			<div className={styles.cardWrapper}>
 				<RenderMembers />
 			</div>
+			{settingsConfig.isCaptionsEnabled && (
+				<div className={styles.captionsWrapper}>
+					<p>Generating . . .</p>
+				</div>
+			)}
 			<div className={styles.bottomNavbar}>
 				{controls.isMuted ? (
 					<div

@@ -1,0 +1,363 @@
+* {
+	font-family: 'Raleway', sans-serif;
+}
+
+.main {
+	min-height: 100vh;
+	width: 100%;
+	background-image: linear-gradient(
+			#4a4a4a65 0.5px,
+			transparent 0.5px,
+			transparent calc(100% - 0.5px),
+			#4a4a4a65 calc(100% - 0.5px)
+		),
+		linear-gradient(
+			90deg,
+			#4a4a4a65 0.5px,
+			transparent 0.5px,
+			transparent calc(100% - 0.5px),
+			#4a4a4a65 calc(100% - 0.5px)
+		);
+	background-size: 3rem 3rem;
+	background-color: var(--bg);
+	padding: 2.5rem 4rem 1rem 4rem;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+
+	> .titleWrapper {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+
+		> .titleContent {
+			width: 80%;
+
+			> h2 {
+				font-size: 5rem;
+				color: white;
+				letter-spacing: 0.25rem;
+			}
+
+			> p {
+				font-size: 1rem;
+				color: #ffffffc8;
+				margin-top: 0.25rem;
+				letter-spacing: 0.25rem;
+
+				&:nth-child(3) {
+					width: 100%;
+					letter-spacing: 0.1rem;
+					font-size: 1.5rem;
+					margin-top: 3rem;
+					line-height: 2rem;
+				}
+			}
+		}
+
+		> .homeButton {
+			padding: 1rem 1.5rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			border-radius: 1rem;
+			background-color: #ffffff19;
+			transition: all 0.25s ease-in-out;
+			border: 1px solid transparent;
+
+			> p {
+				color: white;
+			}
+
+			> svg {
+				margin-left: 0.5rem;
+				color: white;
+				transition: all 0.25s ease-in-out;
+			}
+
+			&:hover {
+				cursor: pointer;
+				border: 1px solid white;
+				background-color: transparent;
+
+				> svg {
+					transform: translateX(0.2rem);
+				}
+			}
+		}
+	}
+
+	> .itemsWrapper {
+		height: 100%;
+		width: 100%;
+		padding: 2rem 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		gap: 2rem;
+
+		> .itemCard {
+			width: 100%;
+			padding: 1rem;
+			display: flex;
+			// align-items: center;
+			justify-content: center;
+			align-items: center;
+
+			> .titleDescription {
+				> h3 {
+					color: white;
+					font-size: 2rem;
+					letter-spacing: 0.25rem;
+					font-weight: 400;
+				}
+
+				p {
+					max-width: 80%;
+					color: #ffffffb0;
+					font-size: 1.5rem;
+					letter-spacing: 0.1rem;
+					font-weight: 400;
+					margin-top: 0.5rem;
+				}
+			}
+
+			> .imageWrapper {
+				margin: 1rem 0;
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+
+				> .image {
+					position: relative;
+					overflow: hidden;
+
+					&:hover {
+						cursor: pointer;
+						> .overlayImage {
+							scale: 100%;
+							transition: all 0.25s ease-in-out;
+						}
+					}
+
+					> .overlayImage {
+						position: absolute;
+						scale: 0%;
+						left: 0;
+						height: 100%;
+						width: 100%;
+						transition: all 0.25s ease-in-out;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						backdrop-filter: blur(5px);
+
+						> p {
+							color: #000000;
+							font-size: 1rem;
+							letter-spacing: 0.1rem;
+							font-weight: 600;
+							background-color: #ffffff;
+							padding: 1rem;
+							border-radius: 1rem;
+							text-align: center;
+						}
+					}
+
+					> img {
+						height: 15rem;
+					}
+				}
+			}
+		}
+	}
+}
+
+@media (min-width: 200px) and (max-width: 1024px) {
+	.main {
+		min-height: 100vh;
+		width: 100%;
+		background-image: linear-gradient(
+				#4a4a4a65 0.5px,
+				transparent 0.5px,
+				transparent calc(100% - 0.5px),
+				#4a4a4a65 calc(100% - 0.5px)
+			),
+			linear-gradient(
+				90deg,
+				#4a4a4a65 0.5px,
+				transparent 0.5px,
+				transparent calc(100% - 0.5px),
+				#4a4a4a65 calc(100% - 0.5px)
+			);
+		background-size: 3rem 3rem;
+		background-color: var(--bg);
+		padding: 1rem;
+		position: relative;
+		display: flex;
+		align-items: center;
+		flex-direction: column;
+
+		.titleWrapper {
+			width: 100%;
+			display: flex;
+			align-items: flex-start;
+			justify-content: center;
+			overflow: hidden;
+
+			> .titleContent {
+				width: 100%;
+
+				> h2 {
+					font-size: 10vw;
+					color: white;
+					letter-spacing: 0.25rem;
+					text-align: left;
+				}
+
+				> p {
+					font-size: 1.25rem;
+					color: #ffffffc8;
+					margin-top: 0.25rem;
+					letter-spacing: 0.25rem;
+					text-align: left;
+
+					&:nth-child(3) {
+						width: 100%;
+						letter-spacing: 0.1rem;
+						font-size: 1.25rem;
+						margin-top: 2rem;
+						line-height: normal;
+					}
+				}
+			}
+
+			> .homeButton {
+				display: none;
+				padding: 1rem 1.5rem;
+				align-items: center;
+				justify-content: center;
+				gap: 0.5rem;
+				border-radius: 1rem;
+				background-color: #ffffff19;
+				transition: all 0.25s ease-in-out;
+				border: 1px solid transparent;
+
+				> p {
+					color: white;
+				}
+
+				> svg {
+					margin-left: 0.5rem;
+					color: white;
+					transition: all 0.25s ease-in-out;
+				}
+
+				&:hover {
+					cursor: pointer;
+					border: 1px solid white;
+					background-color: transparent;
+
+					> svg {
+						transform: translateX(0.2rem);
+					}
+				}
+			}
+		}
+
+		> .itemsWrapper {
+			height: 100%;
+			width: 100%;
+			padding: 2rem 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+			gap: 2rem;
+
+			> .itemCard {
+				width: 100%;
+				padding: 0;
+				display: flex;
+				justify-content: flex-start;
+				align-items: center;
+				flex-direction: column;
+
+				> .titleDescription {
+					> h3 {
+						color: white;
+						font-size: 1.75rem;
+						letter-spacing: 0.25rem;
+						font-weight: 600;
+						text-align: left;
+					}
+
+					p {
+						max-width: 100%;
+						color: #ffffffb0;
+						font-size: 1.25rem;
+						letter-spacing: 0.1rem;
+						font-weight: 400;
+						margin-top: 0.5rem;
+						text-align: left;
+					}
+				}
+
+				> .imageWrapper {
+					width: 100%;
+					margin: 1rem 0;
+					display: flex;
+					align-items: flex-start;
+					gap: 1rem;
+
+					> .image {
+						width: 100%;
+						aspect-ratio: 1/1;
+						position: relative;
+						overflow: hidden;
+
+						&:hover {
+							cursor: pointer;
+							> .overlayImage {
+								scale: 100%;
+								transition: all 0.25s ease-in-out;
+							}
+						}
+
+						> .overlayImage {
+							position: absolute;
+							scale: 0%;
+							left: 0;
+							height: 100%;
+							width: 100%;
+							transition: all 0.25s ease-in-out;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							backdrop-filter: blur(5px);
+
+							> p {
+								color: #000000;
+								font-size: 1rem;
+								letter-spacing: 0.1rem;
+								font-weight: 600;
+								background-color: #ffffff;
+								padding: 1rem;
+								border-radius: 1rem;
+								text-align: center;
+							}
+						}
+
+						> img {
+							aspect-ratio: 1/1;
+							height: 100%;
+							object-fit: contain;
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -39,6 +39,7 @@ import { showToast } from '../Utils/toast';
 import { useConnections } from './SocketPeerContext.jsx';
 import { createUserId } from '../Utils/helper.js';
 import InitialsAvatar from 'react-initials-avatar';
+import Webcam from 'react-webcam';
 
 // Assets
 import enterSound from '../Assets/enter.mp3';
@@ -54,7 +55,7 @@ import {
 const Meeting = () => {
 	const { socket, peer } = useConnections();
 
-	const myVideo = useRef();
+	const myVideo = useRef(null);
 
 	const userId = createUserId();
 
@@ -150,7 +151,7 @@ const Meeting = () => {
 			videoDeviceList: [],
 			audioOutputDeviceList: [],
 			selectedAudioDevice: '',
-			selectedVideoDevice: '',
+			selectedVideoDevice: null,
 			selectedAudioOutputDevice: '',
 			isCaptionsEnabled: false,
 			isTranslationEnabled: false,
@@ -226,42 +227,7 @@ const Meeting = () => {
 			});
 	};
 
-	const checkPermission = async () => {
-		try {
-			await navigator.permissions.query({
-				name: 'camera',
-			});
-			await navigator.permissions.query({
-				name: 'microphone',
-			});
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
-	const getLocalStream = async () => {
-		const localStream =
-			await navigator.mediaDevices.getUserMedia({
-				video: true,
-				audio: true,
-			});
-
-		setStream((prevStream) => ({
-			...prevStream,
-			localStream: localStream,
-		}));
-	};
-
 	useEffect(() => {
-		if (stream.localStream) {
-			console.log('Stream', stream.localStream);
-			myVideo.current.srcObject = stream.localStream;
-		}
-	}, []);
-
-	useEffect(() => {
-		getLocalStream();
-
 		socket.on('add-to-room', (data) => {
 			if (data.status === 'success') {
 				setMembers(data.members);
@@ -458,7 +424,7 @@ const Meeting = () => {
 			return null;
 		}
 
-		return members.map((member, index) => {
+		return members.map((member) => {
 			return member.id == userId ? (
 				<div
 					key={member.id}
@@ -485,10 +451,13 @@ const Meeting = () => {
 					</div>
 					{controls.isVideoCamOn ? (
 						<div className={styles.videoWrapper}>
-							<video
-								src=''
-								ref={myVideo}
-							></video>
+							<Webcam
+								audio={false}
+								videoConstraints={{
+									deviceId:
+										settingsConfig.selectedVideoDevice,
+								}}
+							/>
 						</div>
 					) : (
 						<div className={styles.videoOff}>
@@ -526,7 +495,6 @@ const Meeting = () => {
 					{member.isVideoCamOn ? (
 						<div className={styles.videoWrapper}>
 							<video src=''></video>
-							<p>This is Video Screen</p>
 						</div>
 					) : (
 						<div className={styles.videoOff}>
@@ -653,7 +621,7 @@ const Meeting = () => {
 									name=''
 									id=''
 									value={
-										setSettingsConfig.selectedVideoDevice
+										settingsConfig.selectedVideoDevice
 									}
 									onChange={(e) => {
 										e.preventDefault();
@@ -841,6 +809,7 @@ const Meeting = () => {
 						}));
 					}}
 					selectVideo={(data) => {
+						console.log(data);
 						setSettingsConfig((prevConfig) => ({
 							...prevConfig,
 							selectedVideoDevice: data,

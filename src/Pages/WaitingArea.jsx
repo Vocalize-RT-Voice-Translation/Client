@@ -1,6 +1,7 @@
 import React, {
 	useState,
 	useEffect,
+	useMemo,
 } from 'react';
 import styles from '../Styles/WaitingArea.module.scss';
 import {
@@ -20,12 +21,15 @@ import Loader from './Loader.jsx';
 import { useConnections } from './SocketPeerContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import { createUserId } from '../Utils/helper.js';
+import {
+	FiMicOff,
+	FiVideoOff,
+} from 'react-icons/fi';
+import Webcam from 'react-webcam';
 
 const WaitingArea = () => {
 	const { socket, peer } = useConnections();
 	const roomId = useParams().id ?? 746464;
-
-	console.log(roomId);
 
 	const [isLoading, setIsLoading] = useState({
 		loading: false,
@@ -33,15 +37,16 @@ const WaitingArea = () => {
 	});
 
 	const userId = createUserId();
-
 	const navigate = useNavigate();
 	const [video, setVideo] = useState(true);
 	const [audio, setAudio] = useState(true);
 
-	const [isAudioAvailable, setIsAudioAvailable] =
-		useState(false);
-	const [isVideoAvailable, setIsVideoAvailable] =
-		useState(false);
+	const [mediaConfigs, setMediaConfigs] = useState(
+		{
+			audio: true,
+			video: true,
+		}
+	);
 
 	const [roomDetails, setRoomDetails] = useState({
 		host: '',
@@ -61,6 +66,12 @@ const WaitingArea = () => {
 		audio: [],
 	});
 
+	const [selectedDevices, setSelectedDevices] =
+		useState({
+			video: '',
+			audio: '',
+		});
+
 	const [devices, setDevices] = useState({
 		audio: [],
 		video: [],
@@ -71,14 +82,48 @@ const WaitingArea = () => {
 		setIsPermissionGranted,
 	] = useState(false);
 
-	useEffect(() => {
-		console.log(joineeDetails);
-	}, [joineeDetails]);
+	const [isAudioAvailable, setIsAudioAvailable] =
+		useState(false);
+
+	const [isVideoAvailable, setIsVideoAvailable] =
+		useState(false);
+
+	const getPermission = () => {
+		navigator.mediaDevices
+			.getUserMedia({
+				video: true,
+				audio: true,
+			})
+			.then((stream) => {
+				stream.getTracks().forEach((track) => {
+					track.stop();
+				});
+				setIsPermissionGranted(true);
+			})
+			.catch((err) => {
+				setIsPermissionGranted(false);
+			});
+
+		navigator.mediaDevices
+			.enumerateDevices()
+			.then((devices) => {
+				const audioDevices = devices.filter(
+					(device) => device.kind === 'audioinput'
+				);
+				const videoDevices = devices.filter(
+					(device) => device.kind === 'videoinput'
+				);
+				setDevices({
+					audio: audioDevices,
+					video: videoDevices,
+				});
+			});
+	};
 
 	useEffect(() => {
-		console.log(socket.id);
+		getPermission();
+
 		socket.on('get-room-data', (data) => {
-			console.log(data);
 			if (data.status == 'failed') {
 				showToast('No Meeting Found!', 'error');
 				setIsLoading({
@@ -126,10 +171,6 @@ const WaitingArea = () => {
 			roomId,
 		});
 	};
-
-	useEffect(() => {
-		console.log(roomDetails);
-	}, [roomDetails]);
 
 	const checkPermission = async () => {
 		try {
@@ -211,8 +252,9 @@ const WaitingArea = () => {
 					socketId: socket.id,
 					peerId: peer.id,
 					isTalking: false,
-					isMuted: true,
-					isVideoCamOn: false,
+					isMuted: !mediaConfigs.audio,
+					isVideoCamOn: mediaConfigs.video,
+					mediaDevices: selectedDevices,
 					isHost: false,
 				},
 			};
@@ -224,6 +266,42 @@ const WaitingArea = () => {
 		}
 	};
 
+	const getMemoizedVideo = () =>
+		useMemo(() => {
+			return mediaConfigs.video ? (
+				<Webcam
+					className={styles.webcam}
+					audio={false}
+					video={video}
+					screenshotFormat='image/jpeg'
+					videoConstraints={{
+						deviceId: selectedDevices.video,
+					}}
+				></Webcam>
+			) : (
+				<div className={styles.noVideo}>
+					<FiVideoOff />
+					{!mediaConfigs.audio && <FiMicOff />}
+				</div>
+			);
+		}, [selectedDevices.video, mediaConfigs]);
+
+	const stopVideoTracks = () => {
+		navigator.mediaDevices
+			.getUserMedia({ video: true, audio: true })
+			.then((stream) => {
+				stream.getVideoTracks().forEach((track) => {
+					track.stop();
+				});
+			})
+			.catch((err) => {
+				console.error(
+					'Error stopping video tracks:',
+					err
+				);
+			});
+	};
+
 	return (
 		<>
 			{isLoading.loading == true ? (
@@ -232,20 +310,20 @@ const WaitingArea = () => {
 				<div className={styles.main}>
 					<div className={styles.left}>
 						<div className={styles.videoWrapper}>
-							<img
-								muted
-								autoPlay
-								loop
-								src={person}
-							></img>
+							{getMemoizedVideo()}
 						</div>
 						<p>This is how you will be appearing!</p>
 						<div className={styles.videoControls}>
-							{audio ? (
+							{mediaConfigs.audio ? (
 								<div
 									error='false'
 									className={styles.button}
-									onClick={() => setAudio(false)}
+									onClick={() =>
+										setMediaConfigs({
+											...mediaConfigs,
+											audio: !mediaConfigs.audio,
+										})
+									}
 								>
 									<IoMicSharp />
 								</div>
@@ -253,16 +331,27 @@ const WaitingArea = () => {
 								<div
 									error='true'
 									className={styles.button}
-									onClick={() => setAudio(true)}
+									onClick={() =>
+										setMediaConfigs({
+											...mediaConfigs,
+											audio: !mediaConfigs.audio,
+										})
+									}
 								>
 									<IoMicOffSharp />
 								</div>
 							)}
-							{video ? (
+							{mediaConfigs.video ? (
 								<div
 									error='false'
 									className={styles.button}
-									onClick={() => setVideo(false)}
+									onClick={() => {
+										setMediaConfigs({
+											...mediaConfigs,
+											video: !mediaConfigs.video,
+										});
+										stopVideoTracks();
+									}}
 								>
 									<IoVideocam />
 								</div>
@@ -270,7 +359,12 @@ const WaitingArea = () => {
 								<div
 									error='true'
 									className={styles.button}
-									onClick={() => setVideo(true)}
+									onClick={() =>
+										setMediaConfigs({
+											...mediaConfigs,
+											video: !mediaConfigs.video,
+										})
+									}
 								>
 									<IoVideocamOff />
 								</div>
@@ -304,8 +398,8 @@ const WaitingArea = () => {
 									name=''
 									id=''
 									onChange={(e) =>
-										setChannels({
-											...channels,
+										setSelectedDevices({
+											...selectedDevices,
 											audio: e.target.value,
 										})
 									}
@@ -324,8 +418,8 @@ const WaitingArea = () => {
 									name=''
 									id=''
 									onChange={(e) =>
-										setChannels({
-											...channels,
+										setSelectedDevices({
+											...selectedDevices,
 											video: e.target.value,
 										})
 									}

@@ -1,3 +1,7 @@
+// * {
+// 	border: 1px solid red;
+// }
+
 .modalSettings {
 	width: 100%;
 	height: 50vh;
@@ -251,18 +255,6 @@
 	justify-content: center;
 	flex-direction: column;
 
-	// > .settingsModal {
-	// 	height: 15rem;
-	// 	width: 50%;
-	// 	border: 1px solid red;
-	// 	margin: 0;
-	// 	padding: 0;
-
-	// 	> .main {
-	// 		background-color: white;
-	// 	}
-	// }
-
 	> .titleBar {
 		width: 100%;
 		padding: 1rem 0 0 3rem;
@@ -303,8 +295,8 @@
 		}
 
 		.card {
-			height: 85%;
-			aspect-ratio: 1.75;
+			aspect-ratio: 16/9;
+			width: 60%;
 			background-color: black;
 			border: 2px solid transparent;
 			border-radius: 0.75rem;
@@ -313,7 +305,6 @@
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
-			border-radius: 10px;
 			overflow: hidden;
 			text-align: center;
 
@@ -354,6 +345,73 @@
 
 						&[data-disable-hover='true'] {
 							pointer-events: none;
+						}
+					}
+
+					> .talkingIndicator {
+						width: 3rem;
+						height: 1rem;
+
+						@keyframes pulse {
+							0% {
+								top: 0;
+							}
+							50% {
+								top: 0.5rem;
+							}
+							100% {
+								top: 0;
+							}
+						}
+
+						.animate {
+							> span {
+								animation: pulse 1s infinite;
+							}
+						}
+
+						.stopAnimate {
+							> span {
+								animation: none;
+								top: 75%;
+							}
+						}
+
+						> .iconWrapper {
+							width: 100%;
+							height: 100%;
+							display: flex;
+							justify-content: center;
+							gap: 0.3rem;
+							overflow: hidden;
+							position: relative;
+
+							> span {
+								position: absolute;
+								width: 0.25rem;
+								height: inherit;
+								display: block;
+								left: 0;
+								top: 75%;
+								background-color: #ffffff;
+								transition: all 0.15s ease-in-out;
+
+								&:nth-child(1) {
+									left: 1rem;
+									animation-delay: 0.1s;
+								}
+
+								&:nth-child(2) {
+									left: 1.5rem;
+									animation-delay: 0.2s;
+									animation-duration: 0.5s;
+								}
+
+								&:nth-child(3) {
+									left: 2rem;
+									animation-delay: 0.3s;
+								}
+							}
 						}
 					}
 				}
@@ -400,7 +458,7 @@
 				align-items: center;
 				justify-content: center;
 
-				> video {
+				> .video {
 					width: 100%;
 					height: 100%;
 					object-fit: contain;
@@ -411,8 +469,8 @@
 
 	> .captionsWrapper {
 		width: 60%;
-		height: 25%;
-		margin: 0 0 1rem 0;
+		height: auto;
+		margin: 1rem 0;
 
 		> p {
 			color: white;
@@ -538,74 +596,6 @@
 				color: white;
 				font-size: 1.5rem;
 			}
-		}
-	}
-}
-
-@media screen and (max-width: 900px) {
-	.main {
-		> .titleBar {
-			width: 100%;
-			padding: 1rem 0 0 0;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex-direction: column;
-			gap: 0rem;
-
-			> .title {
-				font-size: 1.25rem;
-				color: #ffffff;
-				padding: 0.5rem 0;
-				font-weight: 600;
-			}
-
-			> .membersCount {
-				font-size: 0.8rem;
-				color: #ffffff;
-				font-weight: 300;
-			}
-		}
-
-		> .cardWrapper {
-			flex-wrap: wrap;
-			justify-content: center;
-			gap: 0rem;
-			padding: 1rem 0;
-
-			> .card {
-				aspect-ratio: 1.75;
-				width: 100%;
-				background-color: black;
-				border: 2px solid transparent;
-				border-radius: 0.75rem;
-				position: relative;
-				display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
-				border-radius: 10px;
-				overflow: hidden;
-				text-align: center;
-			}
-		}
-
-		> .captionsWrapper {
-			width: 60%;
-			height: 15%;
-			margin: 0 0 1rem 0;
-
-			> p {
-				color: white;
-				font-size: 1.5rem;
-				font-weight: 300;
-				line-height: 2rem;
-			}
-		}
-
-		> .bottomNavbar {
-			width: 90%;
-			max-width: 90%;
 		}
 	}
 }
@@ -858,12 +848,597 @@
 	}
 
 	.main {
-		> .bottomNavbar {
-			border-radius: 0;
-			flex-wrap: wrap;
+		background-color: var(--bg);
+		height: 100vh;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+
+		> .titleBar {
 			width: 100%;
-			max-width: 100%;
+			padding: 1rem 0 0 0rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+			gap: 0.25rem;
+
+			> .title {
+				font-size: 1.25rem;
+				color: #ffffff;
+				padding: 0.25rem 0;
+				font-weight: 600;
+			}
+
+			> .membersCount {
+				font-size: 1rem;
+				color: #ffffffcc;
+				font-weight: 300;
+			}
+		}
+
+		> .cardWrapper {
+			height: 100%;
+			width: 90%;
+			padding: 2.5rem 0 0 0;
+			overflow-y: auto;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 1rem;
+			flex-direction: column;
+
+			&::-webkit-scrollbar {
+				display: none;
+			}
+
+			.talking {
+				border: 2px solid green;
+			}
+
+			.card {
+				aspect-ratio: 16/9;
+				width: 100%;
+				background-color: black;
+				border: 2px solid transparent;
+				border-radius: 0.75rem;
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+				text-align: center;
+
+				> .overlay {
+					height: 100%;
+					width: 100%;
+					position: absolute;
+					z-index: 99;
+
+					> .actionButtons {
+						position: absolute;
+						top: 0.75rem;
+						right: 0.75rem;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+
+						> .button {
+							aspect-ratio: 1;
+							height: 2.25rem;
+							background-color: transparent;
+							padding: 0.5rem;
+							border-radius: 100%;
+							cursor: pointer;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							transition: all 0.15s ease-in-out;
+
+							> svg {
+								color: rgb(255, 255, 255);
+								font-size: 1.5rem;
+							}
+
+							&:hover {
+								background-color: rgba(
+									255,
+									255,
+									255,
+									0.1
+								);
+							}
+
+							&[data-disable-hover='true'] {
+								pointer-events: none;
+							}
+						}
+
+						> .talkingIndicator {
+							width: 3rem;
+							height: 1rem;
+
+							@keyframes pulse {
+								0% {
+									top: 0;
+								}
+								50% {
+									top: 0.5rem;
+								}
+								100% {
+									top: 0;
+								}
+							}
+
+							.animate {
+								> span {
+									top: 75%;
+									animation: pulse 1s infinite;
+								}
+							}
+
+							.stopAnimate {
+								animation: none;
+								> span {
+									top: 100%;
+								}
+							}
+
+							> .iconWrapper {
+								width: 100%;
+								height: 100%;
+								display: flex;
+								justify-content: center;
+								gap: 0.3rem;
+								overflow: hidden;
+								position: relative;
+
+								> span {
+									position: absolute;
+									width: 0.25rem;
+									height: inherit;
+									display: block;
+									left: 0;
+									top: 75%;
+									background-color: #ffffff;
+									transition: all 0.15s ease-in-out;
+
+									&:nth-child(1) {
+										left: 1rem;
+										animation-delay: 0.1s;
+									}
+
+									&:nth-child(2) {
+										left: 1.5rem;
+										animation-delay: 0.2s;
+										animation-duration: 0.5s;
+									}
+
+									&:nth-child(3) {
+										left: 2rem;
+										animation-delay: 0.3s;
+									}
+								}
+							}
+						}
+					}
+					> p {
+						color: white;
+						font-size: 1rem;
+						position: absolute;
+						bottom: 1rem;
+						left: 1.5rem;
+					}
+				}
+
+				> .videoOff {
+					position: absolute;
+					width: 100%;
+					height: 100%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					background-color: #000000;
+					color: white;
+					font-size: 1.5rem;
+					z-index: 98;
+
+					> .profile {
+						width: 20%;
+						aspect-ratio: 1;
+						color: white;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						background-color: var(--bg);
+						border-radius: 100%;
+						font-size: 1.5vw;
+					}
+				}
+
+				> .videoWrapper {
+					width: 100%;
+					height: 100%;
+					position: absolute;
+					z-index: 97;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+
+					> .video {
+						width: 100%;
+						height: 100%;
+						object-fit: contain;
+					}
+				}
+			}
+		}
+
+		> .captionsWrapper {
+			width: 90%;
+			height: 20%;
+			margin: 1rem 0;
+			padding: 0 0.5rem;
+
+			> p {
+				color: white;
+				font-size: 4.5vw;
+				font-weight: 300;
+				line-height: 1.5rem;
+			}
+		}
+
+		> .bottomNavbar {
+			min-width: 35%;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-wrap: wrap;
+			padding: 1rem 0.8rem;
+			gap: 1rem;
+			background: rgba(35, 35, 35, 0.35);
+			box-shadow: 0 8px 32px 0
+				rgba(31, 38, 135, 0.105);
+			backdrop-filter: blur(7px);
+			-webkit-backdrop-filter: blur(7px);
+			border-radius: 0rem;
 			margin: 0;
+
+			> .focus {
+				padding: 0.85rem;
+				background-color: white;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				border: 1px solid transparent;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				> svg {
+					color: black;
+					font-size: 1.5rem;
+				}
+			}
+
+			> .icon {
+				padding: 0.85rem;
+				background-color: transparent;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				border: 1px solid #ffffff46;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				> svg {
+					transition: all 0.15s ease-in-out;
+					color: #ffffff;
+					font-size: 1.5rem;
+				}
+
+				&:hover {
+					background-color: white;
+					border: 1px solid transparent;
+					cursor: pointer;
+
+					svg {
+						color: #000000;
+						font-size: 1.5rem;
+					}
+				}
+			}
+
+			> .unfocus {
+				padding: 0.85rem;
+				background-color: transparent;
+				border: 1px solid #ffffff46;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				svg {
+					color: white;
+					font-size: 1.5rem;
+				}
+			}
+
+			> .hangUp {
+				padding: 0.85rem;
+				background-color: #ff5555;
+				border: 1px solid transparent;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				svg {
+					color: #ffffff;
+					font-size: 1.5rem;
+				}
+			}
+
+			> .settings {
+				padding: 0.85rem;
+				background-color: transparent;
+				border: 1px solid #ffffff46;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				svg {
+					color: white;
+					font-size: 1.5rem;
+				}
+			}
+		}
+	}
+}
+
+@media (min-width: 551px) and (max-width: 1000px) {
+	.main {
+		background-color: var(--bg);
+		height: 100vh;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+
+		> .titleBar {
+			width: 100%;
+			padding: 1rem 0 0 3rem;
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+
+			> .title {
+				font-size: 1rem;
+				color: #ffffff;
+				padding: 0.5rem 0;
+				font-weight: 600;
+			}
+
+			> .membersCount {
+				font-size: 0.8rem;
+				color: #ffffff;
+				font-weight: 300;
+			}
+		}
+
+		> .cardWrapper {
+			height: 100%;
+			width: 90%;
+			padding: 2.5rem 0 0 0;
+			overflow-y: auto;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 1rem;
+
+			&::-webkit-scrollbar {
+				display: none;
+			}
+
+			.talking {
+				border: 2px solid green;
+			}
+
+			.card {
+				aspect-ratio: 16/9;
+				width: 90%;
+				background-color: black;
+				border: 2px solid transparent;
+				border-radius: 0.75rem;
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+				text-align: center;
+
+				> .overlay {
+					height: 100%;
+					width: 100%;
+					position: absolute;
+					z-index: 99;
+
+					> .actionButtons {
+						position: absolute;
+						top: 0.75rem;
+						right: 0.75rem;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+
+						> .button {
+							aspect-ratio: 1;
+							height: 2.25rem;
+							background-color: transparent;
+							padding: 0.5rem;
+							border-radius: 100%;
+							cursor: pointer;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							transition: all 0.15s ease-in-out;
+
+							> svg {
+								color: rgb(255, 255, 255);
+								font-size: 1.5rem;
+							}
+
+							&:hover {
+								background-color: rgba(
+									255,
+									255,
+									255,
+									0.1
+								);
+							}
+
+							&[data-disable-hover='true'] {
+								pointer-events: none;
+							}
+						}
+
+						> .talkingIndicator {
+							width: 3rem;
+							height: 1rem;
+
+							@keyframes pulse {
+								0% {
+									top: 0;
+								}
+								50% {
+									top: 0.5rem;
+								}
+								100% {
+									top: 0;
+								}
+							}
+
+							.animate {
+								> span {
+									top: 75%;
+									animation: pulse 1s infinite;
+								}
+							}
+
+							.stopAnimate {
+								animation: none;
+								> span {
+									top: 100%;
+								}
+							}
+
+							> .iconWrapper {
+								width: 100%;
+								height: 100%;
+								display: flex;
+								justify-content: center;
+								gap: 0.3rem;
+								overflow: hidden;
+								position: relative;
+
+								> span {
+									position: absolute;
+									width: 0.25rem;
+									height: inherit;
+									display: block;
+									left: 0;
+									top: 75%;
+									background-color: #ffffff;
+									transition: all 0.15s ease-in-out;
+
+									&:nth-child(1) {
+										left: 1rem;
+										animation-delay: 0.1s;
+									}
+
+									&:nth-child(2) {
+										left: 1.5rem;
+										animation-delay: 0.2s;
+										animation-duration: 0.5s;
+									}
+
+									&:nth-child(3) {
+										left: 2rem;
+										animation-delay: 0.3s;
+									}
+								}
+							}
+						}
+					}
+					> p {
+						color: white;
+						font-size: 1rem;
+						position: absolute;
+						bottom: 1rem;
+						left: 1.5rem;
+					}
+				}
+
+				> .videoOff {
+					position: absolute;
+					width: 100%;
+					height: 100%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					background-color: #000000;
+					color: white;
+					font-size: 1.5rem;
+					z-index: 98;
+
+					> .profile {
+						width: 20%;
+						aspect-ratio: 1;
+						color: white;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						background-color: var(--bg);
+						border-radius: 100%;
+						font-size: 1.5vw;
+					}
+				}
+
+				> .videoWrapper {
+					width: 100%;
+					height: 100%;
+					position: absolute;
+					z-index: 97;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+
+					> .video {
+						width: 100%;
+						height: 100%;
+						object-fit: contain;
+					}
+				}
+			}
 		}
 
 		> .captionsWrapper {
@@ -873,9 +1448,128 @@
 
 			> p {
 				color: white;
-				font-size: 1.25rem;
+				font-size: 1.5rem;
 				font-weight: 300;
-				line-height: normal;
+				line-height: 2rem;
+			}
+		}
+
+		> .bottomNavbar {
+			min-width: 35%;
+			width: fit-content;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0.7rem 0.8rem;
+			gap: 1rem;
+			background: rgba(35, 35, 35, 0.35);
+			box-shadow: 0 8px 32px 0
+				rgba(31, 38, 135, 0.105);
+			backdrop-filter: blur(7px);
+			-webkit-backdrop-filter: blur(7px);
+			border-radius: 10rem;
+			margin: 0 0 2rem 0;
+
+			> .focus {
+				padding: 0.85rem;
+				background-color: white;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				border: 1px solid transparent;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				> svg {
+					color: black;
+					font-size: 1.5rem;
+				}
+			}
+
+			> .icon {
+				padding: 0.85rem;
+				background-color: transparent;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				border: 1px solid #ffffff46;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				> svg {
+					transition: all 0.15s ease-in-out;
+					color: #ffffff;
+					font-size: 1.5rem;
+				}
+
+				&:hover {
+					background-color: white;
+					border: 1px solid transparent;
+					cursor: pointer;
+
+					svg {
+						color: #000000;
+						font-size: 1.5rem;
+					}
+				}
+			}
+
+			> .unfocus {
+				padding: 0.85rem;
+				background-color: transparent;
+				border: 1px solid #ffffff46;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				svg {
+					color: white;
+					font-size: 1.5rem;
+				}
+			}
+
+			> .hangUp {
+				padding: 0.85rem;
+				background-color: #ff5555;
+				border: 1px solid transparent;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				svg {
+					color: #ffffff;
+					font-size: 1.5rem;
+				}
+			}
+
+			> .settings {
+				padding: 0.85rem;
+				background-color: transparent;
+				border: 1px solid #ffffff46;
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10rem;
+				transition: all 0.15s ease-in-out;
+				cursor: pointer;
+
+				svg {
+					color: white;
+					font-size: 1.5rem;
+				}
 			}
 		}
 	}

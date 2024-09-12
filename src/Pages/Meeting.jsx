@@ -4,6 +4,7 @@ import React, {
 	useEffect,
 	useState,
 	useRef,
+	useMemo,
 } from 'react';
 import {
 	useParams,
@@ -54,8 +55,8 @@ import {
 
 const Meeting = () => {
 	const { socket, peer } = useConnections();
-
-	const myVideo = useRef(null);
+	const webcamRef = useRef(null);
+	const audioRef = useRef(null);
 
 	const userId = createUserId();
 
@@ -67,11 +68,13 @@ const Meeting = () => {
 	const MeetingData = location.state.data;
 
 	const [stream, setStream] = useState({
-		localStream: null,
 		remoteStream: null,
 	});
 
 	const { roomId, user } = MeetingData;
+
+	const { mediaDevices, isMuted, isVideoCamOn } =
+		user;
 
 	const [modalWidth, setModalWidth] =
 		useState('50%');
@@ -97,8 +100,8 @@ const Meeting = () => {
 
 	const [controls, setControls] = useState({
 		isTalking: false,
-		isMuted: true,
-		isVideoCamOn: false,
+		isMuted: isMuted,
+		isVideoCamOn: isVideoCamOn,
 		isCaptionsEnabled: false,
 		isTranslationEnabled: false,
 	});
@@ -129,20 +132,9 @@ const Meeting = () => {
 
 	const [members, setMembers] = useState([]);
 
-	const [audioStream, setAudioStream] =
-		useState(null);
-	const [videoStream, setVideoStream] =
-		useState(null);
-
 	const playSound = useCallback((sound) => {
 		const audioData = new Audio(sound);
 		audioData.play();
-	}, []);
-
-	useEffect(() => {
-		getVideoDevices();
-		getAudioDevices();
-		getAudioOutputDevices();
 	}, []);
 
 	const [settingsConfig, setSettingsConfig] =
@@ -166,17 +158,27 @@ const Meeting = () => {
 					(device) => device.kind === 'audioinput'
 				);
 				const getLabels = audioDevices.map(
-					(device) => device.label
+					(device) => ({
+						label: device.label,
+						deviceId: device.deviceId,
+					})
 				);
 				setSettingsConfig((prevConfig) => ({
 					...prevConfig,
 					audioDeviceList: getLabels,
 				}));
 				if (getLabels.length > 0) {
-					setSettingsConfig((prevConfig) => ({
-						...prevConfig,
-						selectedAudioDevice: getLabels[0],
-					}));
+					if (mediaDevices.audio == '') {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							selectedAudioDevice: getLabels[0].deviceId,
+						}));
+					} else {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							selectedAudioDevice: mediaDevices.audio,
+						}));
+					}
 				}
 			});
 	};
@@ -189,7 +191,10 @@ const Meeting = () => {
 					(device) => device.kind === 'audiooutput'
 				);
 				const getLabels = audioOutputDevices.map(
-					(device) => device.label
+					(device) => ({
+						label: device.label,
+						deviceId: device.deviceId,
+					})
 				);
 				setSettingsConfig((prevConfig) => ({
 					...prevConfig,
@@ -198,7 +203,8 @@ const Meeting = () => {
 				if (getLabels.length > 0) {
 					setSettingsConfig((prevConfig) => ({
 						...prevConfig,
-						selectedAudioOutputDevice: getLabels[0],
+						selectedAudioOutputDevice:
+							getLabels[0].deviceId,
 					}));
 				}
 			});
@@ -211,26 +217,49 @@ const Meeting = () => {
 				const videoDevices = devices.filter(
 					(device) => device.kind === 'videoinput'
 				);
+
 				const getLabels = videoDevices.map(
-					(device) => device.label
+					(device) => ({
+						label: device.label,
+						deviceId: device.deviceId,
+					})
 				);
+
 				setSettingsConfig((prevConfig) => ({
 					...prevConfig,
 					videoDeviceList: getLabels,
 				}));
 				if (getLabels.length > 0) {
-					setSettingsConfig((prevConfig) => ({
-						...prevConfig,
-						selectedVideoDevice: getLabels[0],
-					}));
+					if (mediaDevices.video == '') {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							selectedVideoDevice: getLabels[0].deviceId,
+						}));
+					} else {
+						setSettingsConfig((prevConfig) => ({
+							...prevConfig,
+							selectedVideoDevice: mediaDevices.video,
+						}));
+					}
 				}
 			});
 	};
 
 	useEffect(() => {
+		getVideoDevices();
+		getAudioDevices();
+		getAudioOutputDevices();
+	}, []);
+
+	useEffect(() => {
+		acceptPeerCall();
 		socket.on('add-to-room', (data) => {
 			if (data.status === 'success') {
+				console.log(data);
 				setMembers(data.members);
+				if (data.members.length > 1) {
+					makePeerCall(data.members);
+				}
 			} else {
 				console.error(data.message);
 			}
@@ -297,6 +326,123 @@ const Meeting = () => {
 		}
 	}, [controls]);
 
+	const getCombinedStream =
+		useCallback(async () => {
+			const audioStream =
+				await navigator.mediaDevices.getUserMedia({
+					audio: {
+						deviceId:
+							settingsConfig.selectedAudioDevice,
+					},
+				});
+			const videoStream =
+				await navigator.mediaDevices.getUserMedia({
+					video: {
+						deviceId:
+							settingsConfig.selectedVideoDevice,
+					},
+				});
+
+			const combinedStream = new MediaStream([
+				...audioStream.getAudioTracks(),
+				...videoStream.getVideoTracks(),
+			]);
+
+			return combinedStream;
+		}, [
+			settingsConfig.selectedAudioDevice,
+			settingsConfig.selectedVideoDevice,
+		]);
+
+	useEffect(() => {
+		if (webcamRef.current && stream.remoteStream) {
+			const videoTrack =
+				stream.remoteStream.getVideoTracks()[0];
+			const audioTrack =
+				stream.remoteStream.getAudioTracks()[0];
+
+			console.log(videoTrack, audioTrack);
+
+			if (webcamRef.current) {
+				const mediaStream = new MediaStream([
+					videoTrack,
+				]);
+
+				webcamRef.current.srcObject = mediaStream;
+			}
+
+			if (audioRef.current && audioTrack) {
+				const audioStream = new MediaStream([
+					audioTrack,
+				]);
+				audioRef.current.srcObject = audioStream;
+
+				// Mute or unmute audio based on member status
+				const member = members.find(
+					(member) => member.id !== userId
+				);
+				if (member?.isMuted) {
+					audioTrack.enabled = false;
+				} else {
+					audioTrack.enabled = true;
+				}
+			}
+		}
+	}, [stream, members]);
+
+	const makePeerCall = async (members) => {
+		const peerId = members.find(
+			(member) => member.id !== userId
+		).peerId;
+
+		if (!peer) {
+			console.error('Peer is not initialized');
+			return;
+		}
+
+		const stream = await getCombinedStream();
+
+		const call = peer.call(peerId, stream);
+		if (!call) {
+			console.error('Failed to make a call');
+			return;
+		}
+
+		call.on('stream', (remoteStream) => {
+			// Handle the remote stream
+			console.log(
+				'Received Acceptor remote stream',
+				remoteStream
+			);
+			setStream((prevStream) => ({
+				...prevStream,
+				remoteStream: remoteStream,
+			}));
+		});
+
+		call.on('error', (err) => {
+			console.error('Call error:', err);
+		});
+	};
+
+	const acceptPeerCall = async () => {
+		const stream = await getCombinedStream();
+		peer.on('call', (call) => {
+			call.answer(stream);
+			call.on('stream', (remoteStream) => {
+				// Handle the remote stream
+				console.log(
+					'Received Caller remote stream',
+					remoteStream
+				);
+				setStream((prevStream) => ({
+					...prevStream,
+					remoteStream: remoteStream,
+				}));
+			});
+		});
+	};
+
 	useEffect(() => {
 		if (Object.keys(MeetingData).length == 0) {
 			navigate('/meeting');
@@ -315,14 +461,6 @@ const Meeting = () => {
 			...prevControls,
 			isMuted: prevControls.isMuted ? false : true,
 		}));
-
-		if (audioStream) {
-			audioStream
-				.getAudioTracks()
-				.forEach((track) => {
-					track.enabled = !controls.isMuted;
-				});
-		}
 	};
 
 	const toggleVideo = () => {
@@ -333,12 +471,10 @@ const Meeting = () => {
 				: true,
 		}));
 
-		if (videoStream) {
-			videoStream
-				.getVideoTracks()
-				.forEach((track) => {
-					track.enabled = !controls.isVideoCamOn;
-				});
+		if (controls.isVideoCamOn) {
+			showToast('Video Disabled', 'success');
+		} else {
+			showToast('Video Enabled', 'success');
 		}
 	};
 
@@ -419,7 +555,31 @@ const Meeting = () => {
 		}
 	};
 
-	const RenderMembers = () => {
+	const MemoizedWebcam = useMemo(() => {
+		return (
+			<Webcam
+				className={styles.video}
+				audio={false}
+				mirrored={true}
+				videoConstraints={{
+					deviceId: settingsConfig.selectedVideoDevice,
+				}}
+			/>
+		);
+	}, [settingsConfig.selectedVideoDevice]);
+
+	const RemoteVideo = (isMuted) => {
+		return (
+			<Webcam
+				ref={webcamRef}
+				className={styles.video}
+				mirrored={true}
+				audio={!isMuted}
+			/>
+		);
+	};
+
+	const RenderMembers = useCallback(() => {
 		if (!Array.isArray(members)) {
 			return null;
 		}
@@ -434,32 +594,40 @@ const Meeting = () => {
 						<div className={styles.actionButtons}>
 							<div className={styles.button}>
 								{controls.isMuted ? (
-									<IoMicOffSharp />
+									<IoMicOffSharp title='Muted' />
 								) : (
-									<IoMicSharp />
+									<IoMicSharp title='Unmuted' />
 								)}
 							</div>
 							<div className={styles.button}>
 								{controls.isVideoCamOn ? (
-									<MdVideocam />
+									<MdVideocam title='Video Camera On' />
 								) : (
-									<MdVideocamOff />
+									<MdVideocamOff title='Video Camera Off' />
 								)}
+							</div>
+							<div className={styles.talkingIndicator}>
+								<div
+									className={
+										!controls.isTalking
+											? `${styles.iconWrapper} ${styles.stopAnimate}`
+											: `${styles.iconWrapper} ${styles.animate}`
+									}
+								>
+									<span></span>
+									<span></span>
+									<span></span>
+								</div>
 							</div>
 						</div>
 						<p>{member.name}</p>
 					</div>
-					{controls.isVideoCamOn ? (
+					{controls.isVideoCamOn && (
 						<div className={styles.videoWrapper}>
-							<Webcam
-								audio={false}
-								videoConstraints={{
-									deviceId:
-										settingsConfig.selectedVideoDevice,
-								}}
-							/>
+							{MemoizedWebcam}
 						</div>
-					) : (
+					)}
+					{!controls.isVideoCamOn && (
 						<div className={styles.videoOff}>
 							<InitialsAvatar
 								className={styles.profile}
@@ -489,14 +657,28 @@ const Meeting = () => {
 									<MdVideocamOff />
 								)}
 							</div>
+							<div className={styles.talkingIndicator}>
+								<div
+									className={
+										member.isTalking
+											? `${styles.iconWrapper} ${styles.stopAnimate}`
+											: `${styles.iconWrapper} ${styles.animate}`
+									}
+								>
+									<span></span>
+									<span></span>
+									<span></span>
+								</div>
+							</div>
 						</div>
 						<p>{member.name}</p>
 					</div>
-					{member.isVideoCamOn ? (
+					{member.isVideoCamOn && (
 						<div className={styles.videoWrapper}>
-							<video src=''></video>
+							{RemoteVideo(member.isMuted)}
 						</div>
-					) : (
+					)}
+					{!member.isVideoCamOn && (
 						<div className={styles.videoOff}>
 							<InitialsAvatar
 								className={styles.profile}
@@ -507,7 +689,7 @@ const Meeting = () => {
 				</div>
 			);
 		});
-	};
+	}, [members, controls, MemoizedWebcam, userId]);
 
 	const Settings = ({
 		settingsConfig,
@@ -581,10 +763,10 @@ const Meeting = () => {
 									{settingsConfig.audioDeviceList.map(
 										(device) => (
 											<option
-												key={device}
-												value={device}
+												key={device.deviceId}
+												value={device.deviceId}
 											>
-												{device}
+												{device.label}
 											</option>
 										)
 									)}
@@ -606,10 +788,10 @@ const Meeting = () => {
 									{settingsConfig.audioOutputDeviceList.map(
 										(device) => (
 											<option
-												key={device}
-												value={device}
+												key={device.deviceId}
+												value={device.deviceId}
 											>
-												{device}
+												{device.label}
 											</option>
 										)
 									)}
@@ -629,12 +811,12 @@ const Meeting = () => {
 									}}
 								>
 									{settingsConfig.videoDeviceList.map(
-										(device) => (
+										(device, index) => (
 											<option
-												key={device}
-												value={device}
+												key={index}
+												value={device.deviceId}
 											>
-												{device}
+												{device.label}
 											</option>
 										)
 									)}
@@ -809,7 +991,6 @@ const Meeting = () => {
 						}));
 					}}
 					selectVideo={(data) => {
-						console.log(data);
 						setSettingsConfig((prevConfig) => ({
 							...prevConfig,
 							selectedVideoDevice: data,
@@ -860,7 +1041,7 @@ const Meeting = () => {
 				</p>
 			</div>
 			<div className={styles.cardWrapper}>
-				<RenderMembers />
+				{RenderMembers()}
 			</div>
 			{settingsConfig.isCaptionsEnabled && (
 				<div className={styles.captionsWrapper}>
@@ -873,14 +1054,14 @@ const Meeting = () => {
 						className={styles.unfocus}
 						onClick={toggleMic}
 					>
-						<IoMicOffSharp />
+						<IoMicOffSharp title='Muted' />
 					</div>
 				) : (
 					<div
 						className={styles.focus}
 						onClick={toggleMic}
 					>
-						<IoMicSharp />
+						<IoMicSharp title='Unmuted' />
 					</div>
 				)}
 
@@ -953,6 +1134,10 @@ const Meeting = () => {
 					<IoMdSettings />
 				</div>
 			</div>
+			<audio
+				ref={audioRef}
+				autoPlay
+			/>
 		</div>
 	);
 };

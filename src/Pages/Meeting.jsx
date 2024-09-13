@@ -366,26 +366,10 @@ const Meeting = () => {
 			if (webcamRef.current) {
 				const mediaStream = new MediaStream([
 					videoTrack,
+					audioTrack,
 				]);
 
 				webcamRef.current.srcObject = mediaStream;
-			}
-
-			if (audioRef.current && audioTrack) {
-				const audioStream = new MediaStream([
-					audioTrack,
-				]);
-				audioRef.current.srcObject = audioStream;
-
-				// Mute or unmute audio based on member status
-				const member = members.find(
-					(member) => member.id !== userId
-				);
-				if (member?.isMuted) {
-					audioTrack.enabled = false;
-				} else {
-					audioTrack.enabled = true;
-				}
 			}
 		}
 	}, [stream, members]);
@@ -573,8 +557,8 @@ const Meeting = () => {
 			<Webcam
 				ref={webcamRef}
 				className={styles.video}
-				mirrored={true}
 				audio={!isMuted}
+				mirrored={true}
 			/>
 		);
 	};
@@ -609,7 +593,7 @@ const Meeting = () => {
 							<div className={styles.talkingIndicator}>
 								<div
 									className={
-										!controls.isTalking
+										controls.isMuted
 											? `${styles.iconWrapper} ${styles.stopAnimate}`
 											: `${styles.iconWrapper} ${styles.animate}`
 									}
@@ -660,7 +644,7 @@ const Meeting = () => {
 							<div className={styles.talkingIndicator}>
 								<div
 									className={
-										member.isTalking
+										member.isMuted
 											? `${styles.iconWrapper} ${styles.stopAnimate}`
 											: `${styles.iconWrapper} ${styles.animate}`
 									}
@@ -673,11 +657,16 @@ const Meeting = () => {
 						</div>
 						<p>{member.name}</p>
 					</div>
-					{member.isVideoCamOn && (
-						<div className={styles.videoWrapper}>
-							{RemoteVideo(member.isMuted)}
-						</div>
-					)}
+					<div
+						className={
+							member.isVideoCamOn
+								? `${styles.videoWrapper}`
+								: `${styles.videoWrapper} ${styles.videoOff}
+				`
+						}
+					>
+						{RemoteVideo(member.isMuted)}
+					</div>
 					{!member.isVideoCamOn && (
 						<div className={styles.videoOff}>
 							<InitialsAvatar
@@ -1134,10 +1123,6 @@ const Meeting = () => {
 					<IoMdSettings />
 				</div>
 			</div>
-			<audio
-				ref={audioRef}
-				autoPlay
-			/>
 		</div>
 	);
 };

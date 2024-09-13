@@ -449,6 +449,10 @@
 				}
 			}
 
+			> .hideVideo {
+				z-index: 0;
+			}
+
 			> .videoWrapper {
 				width: 100%;
 				height: 100%;

@@ -148,6 +148,7 @@ const Meeting = () => {
 			isCaptionsEnabled: false,
 			isTranslationEnabled: false,
 			speakerLanguage: 'English',
+			unselectVideo: null,
 		});
 
 	const getAudioDevices = async () => {
@@ -545,12 +546,20 @@ const Meeting = () => {
 				className={styles.video}
 				audio={false}
 				mirrored={true}
-				videoConstraints={{
-					deviceId: settingsConfig.selectedVideoDevice,
-				}}
+				videoConstraints={
+					controls.isVideoCamOn
+						? {
+								deviceId:
+									settingsConfig.selectedVideoDevice,
+						  }
+						: false
+				}
 			/>
 		);
-	}, [settingsConfig.selectedVideoDevice]);
+	}, [
+		settingsConfig.selectedVideoDevice,
+		controls.isVideoCamOn,
+	]);
 
 	const RemoteVideo = (isMuted) => {
 		return (

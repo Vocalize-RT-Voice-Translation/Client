@@ -20,6 +20,7 @@ import 'react-initials-avatar/lib/ReactInitialsAvatar.css';
 import {
 	IoMicSharp,
 	IoMicOffSharp,
+	IoWarningOutline,
 } from 'react-icons/io5';
 import {
 	MdVideocam,
@@ -56,7 +57,13 @@ import {
 const Meeting = () => {
 	const { socket, peer } = useConnections();
 	const webcamRef = useRef(null);
-	const audioRef = useRef(null);
+	const localCamRef = useRef(null);
+
+	const [localStream, setLocalStream] =
+		useState(null);
+
+	const [remoteStream, setRemoteStream] =
+		useState(null);
 
 	const userId = createUserId();
 
@@ -66,10 +73,6 @@ const Meeting = () => {
 	const location = useLocation();
 
 	const MeetingData = location.state.data;
-
-	const [stream, setStream] = useState({
-		remoteStream: null,
-	});
 
 	const { roomId, user } = MeetingData;
 
@@ -169,7 +172,7 @@ const Meeting = () => {
 					audioDeviceList: getLabels,
 				}));
 				if (getLabels.length > 0) {
-					if (mediaDevices.audio == '') {
+					if (mediaDevices ?? true) {
 						setSettingsConfig((prevConfig) => ({
 							...prevConfig,
 							selectedAudioDevice: getLabels[0].deviceId,
@@ -231,7 +234,7 @@ const Meeting = () => {
 					videoDeviceList: getLabels,
 				}));
 				if (getLabels.length > 0) {
-					if (mediaDevices.video == '') {
+					if (mediaDevices ?? true) {
 						setSettingsConfig((prevConfig) => ({
 							...prevConfig,
 							selectedVideoDevice: getLabels[0].deviceId,
@@ -245,6 +248,16 @@ const Meeting = () => {
 				}
 			});
 	};
+
+	useEffect(() => {
+		getCombinedStream().then((stream) => {
+			setLocalStream(stream);
+		});
+	}, []);
+
+	useEffect(() => {
+		updateStream();
+	}, [settingsConfig]);
 
 	useEffect(() => {
 		getVideoDevices();
@@ -309,7 +322,7 @@ const Meeting = () => {
 			socket.off('new-user');
 			socket.off('add-to-room');
 		};
-	}, [socket]);
+	}, []);
 
 	useEffect(() => {
 		if (isMounted) {
@@ -355,14 +368,19 @@ const Meeting = () => {
 			settingsConfig.selectedVideoDevice,
 		]);
 
+	//Remote Stream Handler
 	useEffect(() => {
-		if (webcamRef.current && stream.remoteStream) {
+		if (remoteStream) {
 			const videoTrack =
-				stream.remoteStream.getVideoTracks()[0];
+				remoteStream.getVideoTracks()[0];
 			const audioTrack =
-				stream.remoteStream.getAudioTracks()[0];
+				remoteStream.getAudioTracks()[0];
 
-			console.log(videoTrack, audioTrack);
+			console.log(
+				'Remote Video',
+				videoTrack,
+				audioTrack
+			);
 
 			if (webcamRef.current) {
 				const mediaStream = new MediaStream([
@@ -373,7 +391,32 @@ const Meeting = () => {
 				webcamRef.current.srcObject = mediaStream;
 			}
 		}
-	}, [stream, members]);
+	}, [remoteStream, members]);
+
+	//Local Stream Handler
+	useEffect(() => {
+		if (localStream) {
+			const videoTrack =
+				localStream.getVideoTracks()[0];
+			const audioTrack =
+				localStream.getAudioTracks()[0];
+
+			console.log(
+				'Local Video',
+				videoTrack,
+				audioTrack
+			);
+
+			if (localCamRef.current) {
+				const mediaStream = new MediaStream([
+					videoTrack,
+					audioTrack,
+				]);
+
+				localCamRef.current.srcObject = mediaStream;
+			}
+		}
+	}, [localStream]);
 
 	const makePeerCall = async (members) => {
 		const peerId = members.find(
@@ -399,10 +442,7 @@ const Meeting = () => {
 				'Received Acceptor remote stream',
 				remoteStream
 			);
-			setStream((prevStream) => ({
-				...prevStream,
-				remoteStream: remoteStream,
-			}));
+			setRemoteStream(remoteStream);
 		});
 
 		call.on('error', (err) => {
@@ -414,18 +454,20 @@ const Meeting = () => {
 		const stream = await getCombinedStream();
 		peer.on('call', (call) => {
 			call.answer(stream);
-			call.on('stream', (remoteStream) => {
+			call.on('stream', (RemoteStream) => {
 				// Handle the remote stream
 				console.log(
 					'Received Caller remote stream',
-					remoteStream
+					RemoteStream
 				);
-				setStream((prevStream) => ({
-					...prevStream,
-					remoteStream: remoteStream,
-				}));
+				setRemoteStream(RemoteStream);
 			});
 		});
+	};
+
+	const updateStream = async () => {
+		const newStream = await getCombinedStream();
+		peer.replaceStream(newStream);
 	};
 
 	useEffect(() => {
@@ -543,17 +585,11 @@ const Meeting = () => {
 	const MemoizedWebcam = useMemo(() => {
 		return (
 			<Webcam
+				ref={localCamRef}
 				className={styles.video}
 				audio={false}
 				mirrored={true}
-				videoConstraints={
-					controls.isVideoCamOn
-						? {
-								deviceId:
-									settingsConfig.selectedVideoDevice,
-						  }
-						: false
-				}
+				srcObject={localStream}
 			/>
 		);
 	}, [
@@ -561,13 +597,14 @@ const Meeting = () => {
 		controls.isVideoCamOn,
 	]);
 
-	const RemoteVideo = (isMuted) => {
+	const RemoteVideo = (member) => {
 		return (
 			<Webcam
 				ref={webcamRef}
 				className={styles.video}
-				audio={!isMuted}
+				audio={!member.isMuted}
 				mirrored={true}
+				srcObject={remoteStream}
 			/>
 		);
 	};
@@ -674,7 +711,7 @@ const Meeting = () => {
 				`
 						}
 					>
-						{RemoteVideo(member.isMuted)}
+						{RemoteVideo(member)}
 					</div>
 					{!member.isVideoCamOn && (
 						<div className={styles.videoOff}>
@@ -745,6 +782,10 @@ const Meeting = () => {
 					<h2>{itemVisible}</h2>
 					{itemVisible === 'Media Devices' ? (
 						<div className={styles.rightItem}>
+							{/* <div className={styles.disabled}>
+								<IoWarningOutline />
+								<p>Under Development</p>
+							</div> */}
 							<div className={styles.audioWrapper}>
 								<p>Microphone Devices</p>
 								<select

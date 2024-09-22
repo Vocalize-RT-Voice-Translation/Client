@@ -8,7 +8,7 @@ import io from 'socket.io-client';
 import Peer from 'peerjs';
 import secrets from '../../secrets.js';
 
-const { SOCKET_URL } = secrets;
+const { SOCKET_URL, PEER_HOST } = secrets;
 
 const ConnectionContext = createContext();
 
@@ -35,7 +35,7 @@ export const ConnectionProvider = ({
 
 			// Initialize PeerJS connection
 			const newPeer = new Peer({
-				host: 'localhost',
+				host: PEER_HOST,
 				port: 3002,
 				path: '/peerjs/connections',
 			});

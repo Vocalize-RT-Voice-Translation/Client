@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 import './Styles/globals.scss';
 import { Toaster } from 'react-hot-toast';
+
 // Page Imports
 import Home from './Pages/Home.jsx';
 import Layout from './Pages/Layout.jsx';
@@ -16,9 +17,11 @@ import Developers from './Pages/Developers.jsx';
 import Translate from './Pages/Translate.jsx';
 import Meeting from './Pages/Meeting.jsx';
 import NewMeeting from './Pages/NewMeeting.jsx';
-import { RecoilRoot } from 'recoil';
 import WaitingArea from './Pages/WaitingArea.jsx';
+
+// Context Imports
 import { ConnectionProvider } from './Pages/SocketPeerContext.jsx';
+import { RecoilRoot } from 'recoil';
 
 ReactDOM.createRoot(
 	document.getElementById('root')

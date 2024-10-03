@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@ant-design/icons": "^5.4.0",
 		"@szhsin/react-menu": "^4.2.2",
+		"@zegocloud/zego-uikit-prebuilt": "^2.10.0",
 		"antd": "^5.20.6",
 		"axios": "^1.7.7",
 		"farzi.js": "^1.0.6",
@@ -19,6 +20,7 @@
 		"js-cookie": "^3.0.5",
 		"locomotive-scroll": "^5.0.0-beta.21",
 		"media-devices": "^0.5.0",
+		"microsoft-cognitiveservices-speech-sdk": "^1.40.0",
 		"peerjs": "^1.5.4",
 		"react": "^18.3.1",
 		"react-burger-menu": "^3.0.9",
@@ -28,6 +30,7 @@
 		"react-initials-avatar": "^1.1.2",
 		"react-media-recorder": "^1.7.1",
 		"react-router-dom": "^6.25.1",
+		"react-speakup": "^1.1.2",
 		"react-voice-to-text": "^1.2.0",
 		"react-webcam": "^7.2.0",
 		"recoil": "^0.7.7",

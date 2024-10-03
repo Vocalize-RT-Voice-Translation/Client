@@ -38,16 +38,23 @@ const NewMeeting = () => {
 				setCode('');
 				showToast('No Meeting Found!', 'error');
 			} else {
-				navigate(
-					`/waiting/${data.roomId}?joinee=true&name=${joineeName}`
-				);
+				navigate(`/meeting/${data.roomId}`, {
+					state: {
+						isWaiting: false,
+						data: {
+							user: {
+								name: joineeName,
+							},
+						},
+					},
+				});
 			}
 		});
 
 		socket.on('new-meeting', (data) => {
 			console.log(data);
 			if (data.status == 'success') {
-				playMp3Sound();
+				// playMp3Sound();
 				navigate(`/meeting/${data.roomId}`, {
 					state: { isWaiting: false, data: data },
 				});

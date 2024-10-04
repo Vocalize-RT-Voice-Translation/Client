@@ -24,16 +24,13 @@ export const ConnectionProvider = ({
 
 	useEffect(() => {
 		const initializeConnections = async () => {
-			// Initialize socket connection
 			const newSocket = io(SOCKET_URL);
 			setSocket(newSocket);
 
-			// Wait for socket connection to be ready
 			await new Promise((resolve) => {
 				newSocket.on('connect', resolve);
 			});
 
-			// Initialize PeerJS connection
 			const newPeer = new Peer({
 				host: PEER_HOST,
 				port: 3002,
@@ -41,7 +38,6 @@ export const ConnectionProvider = ({
 			});
 			setPeer(newPeer);
 
-			// Wait for PeerJS connection to open
 			await new Promise((resolve) => {
 				newPeer.on('open', resolve);
 			});
@@ -49,16 +45,14 @@ export const ConnectionProvider = ({
 
 		initializeConnections();
 
-		// Cleanup function to close connections on unmount
 		return () => {
 			if (socket) socket.close();
 			if (peer) peer.destroy();
 		};
-	}, []); // Empty dependency array to ensure useEffect runs only once
+	}, []);
 
-	// Only render children if both socket and peer are initialized
 	if (!socket || !peer) {
-		return null; // Don't render anything until both are ready
+		return null;
 	}
 
 	return (

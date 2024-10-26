@@ -33,7 +33,9 @@ const Meeting = () => {
 
 	const [roomState, setRoomState] = useState(
 		'pre-meeting'
-	); // State to track the room state
+	);
+
+	const streamRef = useRef(null);
 
 	const [settingsConfig, setSettingsConfig] =
 		useState({
@@ -72,38 +74,51 @@ const Meeting = () => {
 	const [isSettingsVisible, setIsSettingsVisible] =
 		useState(false);
 
+	const [audioStream, setAudioStream] = useState(
+		new MediaStream()
+	);
+
 	const name =
 		location.state?.data?.user?.name ??
 		'Guest User';
 
-	const Meeting = async (element) => {
+	const MeetingComp = async (element) => {
 		const appId = Number(APP_ID);
 		const server = APP_SECRET.toString();
+		const userID = uuidv4();
 		const kitToken =
 			ZegoUIKitPrebuilt.generateKitTokenForTest(
 				appId,
 				server,
 				id,
-				uuidv4(),
+				userID,
 				name
 			);
 		const zc = ZegoUIKitPrebuilt.create(kitToken);
+		streamRef.current = zc.localStream;
 
 		zc.joinRoom({
 			container: element,
 			scenario: {
 				mode: ZegoUIKitPrebuilt.OneONoneCall,
 			},
-			onRoomStateUpdate: (state) => {
-				console.log('Room state updated:', state);
-				if (state === 'CONNECTED') {
-					setRoomState('meeting');
-				} else {
-					setRoomState('pre-meeting');
-				}
-			},
 		});
 	};
+
+	useEffect(() => {
+		if (MeetingComp.current) {
+			initializeMeeting(MeetingComp.current);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (streamRef.current) {
+			console.log(
+				'StreamRef updated:',
+				streamRef.current
+			);
+		}
+	}, [streamRef.current]);
 
 	const Settings = ({
 		settingsConfig,
@@ -349,7 +364,12 @@ const Meeting = () => {
 					}}
 				/>
 			</Modal>
-			<div ref={Meeting} />
+			<div
+				ref={MeetingComp}
+				onContextMenu={(e) => {
+					e.preventDefault();
+				}}
+			/>
 			{settingsConfig.isCaptionsEnabled && (
 				<div className={styles.captions}>
 					<p>

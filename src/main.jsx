@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import 'regenerator-runtime/runtime';
 import {
 	BrowserRouter,
 	Route,
@@ -14,7 +15,7 @@ import Layout from './Pages/Layout.jsx';
 import About from './Pages/About.jsx';
 import Technology from './Pages/Technology.jsx';
 import Developers from './Pages/Developers.jsx';
-import Translate from './Pages/Translate.jsx';
+import SpeechTranscription from './Pages/Recog.jsx';
 import Meeting from './Pages/Meeting.jsx';
 import NewMeeting from './Pages/NewMeeting.jsx';
 import WaitingArea from './Pages/WaitingArea.jsx';
@@ -39,7 +40,7 @@ ReactDOM.createRoot(
 							/>
 							<Route
 								path='/translate'
-								element={<Translate />}
+								element={<SpeechTranscription />}
 							/>
 							<Route
 								path='/about'

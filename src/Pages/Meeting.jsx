@@ -10,6 +10,7 @@ import {
 import secrets from '../../secrets.js';
 import styles from '../Styles/Meeting.module.scss';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
+import { ZegoExpressEngine } from 'zego-express-engine-webrtc';
 import { v4 as uuidv4 } from 'uuid';
 import { BsTranslate } from 'react-icons/bs';
 import { BiCaptions } from 'react-icons/bi';
@@ -77,6 +78,8 @@ const Meeting = () => {
 	const [audioStream, setAudioStream] = useState(
 		new MediaStream()
 	);
+
+	const zegoEngine = useRef(null);
 
 	const name =
 		location.state?.data?.user?.name ??

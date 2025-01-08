@@ -28,7 +28,7 @@ import {
 import Webcam from 'react-webcam';
 
 const WaitingArea = () => {
-	const { socket, peer } = useConnections();
+	const { socket } = useConnections();
 	const roomId = useParams().id ?? 746464;
 
 	const [isLoading, setIsLoading] = useState({
@@ -58,7 +58,6 @@ const WaitingArea = () => {
 		useState({
 			joinee: false,
 			name: 'Guest',
-			peerId: '',
 		});
 
 	const [channels, setChannels] = useState({
@@ -160,7 +159,6 @@ const WaitingArea = () => {
 				roomId: roomId,
 				joinee: queryParams.get('joinee') ?? false,
 				name: queryParams.get('name') ?? 'Guest',
-				peerId: peer.id,
 			};
 		});
 		getRoomData();
@@ -250,7 +248,6 @@ const WaitingArea = () => {
 					name: joineeDetails.name,
 					roomId: String(roomId),
 					socketId: socket.id,
-					peerId: peer.id,
 					isTalking: false,
 					isMuted: !mediaConfigs.audio,
 					isVideoCamOn: mediaConfigs.video,

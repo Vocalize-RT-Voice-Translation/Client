@@ -175,7 +175,6 @@ const NewMeeting = () => {
 			name: joineeName,
 			roomId: String(Farzi.number.getNumber(4)),
 			socketId: socket.id,
-			peerId: peer.id,
 			isTalking: false,
 			isMuted: true,
 			isVideoCamOn: false,

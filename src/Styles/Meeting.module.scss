@@ -1,364 +1,359 @@
 .modalSettings {
-	width: 100%;
-	height: 50vh;
-	margin: 1.5rem 0 0 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  width: 100%;
+  height: 50vh;
+  margin: 1.5rem 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-	> .left {
-		height: 100%;
-		width: 30%;
-		border-right: 1px solid #0000003c;
+  > .left {
+    height: 100%;
+    width: 30%;
+    border-right: 1px solid #0000003c;
 
-		> h2 {
-			font-size: 1.5rem;
-			color: #000000;
-			padding: 0 0 0 1rem;
-		}
+    > h2 {
+      font-size: 1.5rem;
+      color: #000000;
+      padding: 0 0 0 1rem;
+    }
 
-		> .itemWrapper {
-			height: 100%;
-			display: flex;
-			align-items: center;
-			flex-direction: column;
-			margin: 2rem 0 0 0;
-			padding: 0 0.5rem 0 0;
-			gap: 0.5rem;
+    > .itemWrapper {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      margin: 2rem 0 0 0;
+      padding: 0 0.5rem 0 0;
+      gap: 0.5rem;
 
-			> .item {
-				width: 100%;
-				display: flex;
-				align-items: center;
-				// justify-content: center;
-				padding: 1rem;
-				cursor: pointer;
-				border-top-right-radius: 2rem;
-				border-bottom-right-radius: 2rem;
-				transition: all 0.15s ease-in-out;
+      > .item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        // justify-content: center;
+        padding: 1rem;
+        cursor: pointer;
+        border-top-right-radius: 2rem;
+        border-bottom-right-radius: 2rem;
+        transition: all 0.15s ease-in-out;
 
-				p {
-					color: #000000dd;
-					font-size: 1rem;
-					margin: 0 0 0 1rem;
-					transition: all 0.15s ease-in-out;
-				}
+        p {
+          color: #000000dd;
+          font-size: 1rem;
+          margin: 0 0 0 1rem;
+          transition: all 0.15s ease-in-out;
+        }
 
-				> svg {
-					font-size: 1.5rem;
-					color: #000000c8;
-					transition: all 0.15s ease-in-out;
+        > svg {
+          font-size: 1.5rem;
+          color: #000000c8;
+          transition: all 0.15s ease-in-out;
 
-					&:nth-child(3) {
-						color: orange;
-						font-size: 1rem;
-						margin-left: 0.75rem;
-					}
-				}
+          &:nth-child(3) {
+            color: orange;
+            font-size: 1rem;
+            margin-left: 0.75rem;
+          }
+        }
 
-				&:hover {
-					background-color: #00000010;
-				}
-			}
+        &:hover {
+          background-color: #00000010;
+        }
+      }
 
-			> .focused {
-				background-color: #00000029;
+      > .focused {
+        background-color: #00000029;
 
-				p {
-					color: #000000;
-				}
+        p {
+          color: #000000;
+        }
 
-				> svg {
-					color: #000000;
-				}
-			}
-		}
-	}
+        > svg {
+          color: #000000;
+        }
+      }
+    }
+  }
 
-	> .right {
-		height: 100%;
-		width: 70%;
-		margin: 0 1rem;
-		overflow-y: auto;
+  > .right {
+    height: 100%;
+    width: 70%;
+    margin: 0 1rem;
+    overflow-y: auto;
 
-		> h2 {
-			font-size: 1.5rem;
-			color: #000000;
-			padding: 0 0 0 1rem;
-		}
+    > h2 {
+      font-size: 1.5rem;
+      color: #000000;
+      padding: 0 0 0 1rem;
+    }
 
-		> .rightItem {
-			width: 100%;
-			padding: 1rem;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex-direction: column;
-			gap: 1rem;
+    > .rightItem {
+      width: 100%;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
 
-			> .audioWrapper {
-				width: 100%;
+      > .audioWrapper {
+        width: 100%;
 
-				> p {
-					font-size: 1rem;
-					font-weight: 600;
-					color: #000000;
-					margin: 0.5rem 0;
-				}
+        > p {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #000000;
+          margin: 0.5rem 0;
+        }
 
-				> select {
-					width: 100%;
-					padding: 0.5rem;
-					border: 1px solid #0000003c;
-					background-color: #ffffff00;
-					color: #000000;
-					font-size: 1rem;
+        > select {
+          width: 100%;
+          padding: 0.5rem;
+          border: 1px solid #0000003c;
+          background-color: #ffffff00;
+          color: #000000;
+          font-size: 1rem;
 
-					&:focus {
-						outline: none;
-					}
-				}
-			}
+          &:focus {
+            outline: none;
+          }
+        }
+      }
 
-			> .videoWrapper {
-				width: 100%;
+      > .videoWrapper {
+        width: 100%;
 
-				> p {
-					font-size: 1rem;
-					font-weight: 600;
-					color: #000000;
-					margin: 0.5rem 0;
-				}
+        > p {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #000000;
+          margin: 0.5rem 0;
+        }
 
-				> select {
-					width: 100%;
-					padding: 0.5rem;
-					border: 1px solid #0000003c;
-					background-color: #ffffff00;
-					color: #000000;
-					font-size: 1rem;
+        > select {
+          width: 100%;
+          padding: 0.5rem;
+          border: 1px solid #0000003c;
+          background-color: #ffffff00;
+          color: #000000;
+          font-size: 1rem;
 
-					&:focus {
-						outline: none;
-					}
-				}
-			}
+          &:focus {
+            outline: none;
+          }
+        }
+      }
 
-			> .capitonWrapper {
-				display: flex;
-				// align-items: center;
-				justify-content: center;
+      > .capitonWrapper {
+        display: flex;
+        // align-items: center;
+        justify-content: center;
 
-				> .info {
-					> h3 {
-						font-size: 1.15rem;
-						color: #000000;
-						margin: 0.25rem 0;
-					}
+        > .info {
+          > h3 {
+            font-size: 1.15rem;
+            color: #000000;
+            margin: 0.25rem 0;
+          }
 
-					> p {
-						font-size: 1rem;
-						color: #000000;
-						margin: 0.5rem 0;
+          > p {
+            font-size: 1rem;
+            color: #000000;
+            margin: 0.5rem 0;
 
-						> b {
-							font-size: 0.8rem;
-						}
-					}
-				}
+            > b {
+              font-size: 0.8rem;
+            }
+          }
+        }
 
-				> .switch {
-					margin: 0.25rem 0 0 0;
-				}
-			}
+        > .switch {
+          margin: 0.25rem 0 0 0;
+        }
+      }
 
-			> .translationWrapper {
-				display: flex;
-				justify-content: center;
-				flex-direction: column;
+      > .translationWrapper {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
 
-				> .headingWrapper {
-					display: flex;
-					justify-content: center;
+        > .headingWrapper {
+          display: flex;
+          justify-content: center;
 
-					.heading {
-						> h3 {
-							font-size: 1.15rem;
-							color: #000000;
-							margin: 0.25rem 0;
-						}
+          .heading {
+            > h3 {
+              font-size: 1.15rem;
+              color: #000000;
+              margin: 0.25rem 0;
+            }
 
-						> p {
-							font-size: 1rem;
-							color: #000000;
-							margin: 0.5rem 0;
+            > p {
+              font-size: 1rem;
+              color: #000000;
+              margin: 0.5rem 0;
 
-							> b {
-								font-size: 0.8rem;
-							}
-						}
-					}
+              > b {
+                font-size: 0.8rem;
+              }
+            }
+          }
 
-					> .switch {
-						margin: 0.25rem 0 0 0;
-					}
-				}
+          > .switch {
+            margin: 0.25rem 0 0 0;
+          }
+        }
 
-				> .optionsWrapper {
-					> .languageSelector {
-						width: 100%;
+        > .optionsWrapper {
+          > .languageSelector {
+            width: 100%;
 
-						> p {
-							font-size: 1rem;
-							font-weight: 600;
-							color: #000000;
-							margin: 0.5rem 0;
-						}
+            > p {
+              font-size: 1rem;
+              font-weight: 600;
+              color: #000000;
+              margin: 0.5rem 0;
+            }
 
-						> select {
-							width: 100%;
-							padding: 0.5rem;
-							border: 1px solid #0000003c;
-							background-color: #ffffff00;
-							color: #000000;
-							font-size: 1rem;
+            > select {
+              width: 100%;
+              padding: 0.5rem;
+              border: 1px solid #0000003c;
+              background-color: #ffffff00;
+              color: #000000;
+              font-size: 1rem;
 
-							&:focus {
-								outline: none;
-							}
-						}
+              &:focus {
+                outline: none;
+              }
+            }
 
-						&:nth-child(1) {
-							margin: 1.5rem 0 0 0;
-						}
+            &:nth-child(1) {
+              margin: 1.5rem 0 0 0;
+            }
 
-						&:nth-child(2) {
-							margin: 1rem 0 0 0;
-						}
-					}
-				}
-			}
-		}
-	}
+            &:nth-child(2) {
+              margin: 1rem 0 0 0;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 .main {
-	height: 100vh;
-	max-height: 100vh;
-	background-color: var(--bg);
-	position: relative;
-	overflow: hidden;
+  height: 100vh;
+  max-height: 100vh;
+  background-color: var(--bg);
+  position: relative;
+  overflow: hidden;
 
-	> .captions {
-		pointer-events: none;
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100vh;
-		color: #ffffff;
-		padding: 0.5rem;
-		text-align: center;
-		font-size: 1rem;
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
+  > .captions {
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    color: #ffffff;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 1rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
 
-		> p {
-			max-width: 75%;
-			margin: 0 0 7rem 0;
-			letter-spacing: 0.1rem;
-			font-size: 1vw;
-			opacity: 0.75;
-		}
-	}
+    > p {
+      max-width: 75%;
+      margin: 0 0 7rem 0;
+      font-size: 1.5vw;
+      opacity: 0.75;
+    }
+  }
 
-	> div {
-		height: 100vh;
-		max-height: 100vh;
+  > div {
+    height: 100vh;
+    max-height: 100vh;
 
-		> div > div > div {
-			border-radius: 0;
-			box-shadow: none;
-		}
-	}
+    > div > div > div {
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
 
-	> .settingsOverlay {
-		position: absolute;
-		left: -1vw;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 5vw;
-		height: fit-content;
-		border-radius: 0.5rem;
-		background-color: #9f9a9a1e;
-		opacity: 0.3;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-direction: column;
-		cursor: pointer;
-		transition: all 0.3s ease-in-out;
-		overflow: hidden;
-		z-index: 9999;
+  > .settingsOverlay {
+    position: absolute;
+    left: -1vw;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5vw;
+    height: fit-content;
+    border-radius: 0.5rem;
+    background-color: #9f9a9a1e;
+    opacity: 0.3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    z-index: 9999;
 
-		&:hover {
-			background-color: #9f9a9a38;
-			opacity: 1;
-			left: 2vw;
-		}
+    &:hover {
+      background-color: #9f9a9a38;
+      opacity: 1;
+      left: 2vw;
+    }
 
-		> .button {
-			width: 100%;
-			aspect-ratio: 1;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			transition: all 0.2s ease-in-out;
-			position: relative;
+    > .button {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease-in-out;
+      position: relative;
 
-			> svg {
-				font-size: 1.75rem;
-				color: #ffffff;
-				transition: all 0.2s ease-in-out;
-			}
+      > svg {
+        font-size: 1.75rem;
+        color: #ffffff;
+        transition: all 0.2s ease-in-out;
+      }
 
-			@keyframes fade {
-				0% {
-					opacity: 0;
-				}
-				50% {
-					opacity: 1;
-				}
-				100% {
-					opacity: 0;
-				}
-			}
+      @keyframes fade {
+        0% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
 
-			> .dot {
-				position: absolute;
-				top: 1.5rem;
-				right: 1.5rem;
-				height: 3px;
-				aspect-ratio: 1;
-				border-radius: 10rem;
-				background-color: rgb(186, 121, 255);
-				animation: fade 2s infinite ease-in-out;
-				animation-timing-function: cubic-bezier(
-					0.4,
-					0,
-					0.2,
-					1
-				);
-			}
+      > .dot {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        height: 3px;
+        aspect-ratio: 1;
+        border-radius: 10rem;
+        background-color: rgb(186, 121, 255);
+        animation: fade 2s infinite ease-in-out;
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      }
 
-			&:hover {
-				background-color: #ffffff;
+      &:hover {
+        background-color: #ffffff;
 
-				> svg {
-					color: var(--bg);
-				}
-			}
-		}
-	}
+        > svg {
+          color: var(--bg);
+        }
+      }
+    }
+  }
 }

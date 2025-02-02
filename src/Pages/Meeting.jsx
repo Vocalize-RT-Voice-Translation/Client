@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import secrets from "../../secrets.js";
 import styles from "../Styles/Meeting.module.scss";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import { ZegoUIKitPrebuilt, ZegoUIKit } from "@zegocloud/zego-uikit-prebuilt";
+import { ZegoExpressEngine } from "zego-express-engine-webrtc"; // Import ZegoExpressEngine
 import { v4 as uuidv4 } from "uuid";
 import { BsTranslate } from "react-icons/bs";
 import { BiCaptions } from "react-icons/bi";
@@ -16,11 +17,14 @@ import { createUserId } from "../Utils/helper.js";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
+import axios from "axios";
+
+const captionThreshold = 100;
 
 const Meeting = () => {
   const { socket } = useConnections();
   const userId = createUserId();
-  const { APP_ID, APP_SECRET } = secrets;
+  const { APP_ID, APP_SECRET, TRANSLATION_ENDPOINT } = secrets;
   const { id } = useParams();
   const location = useLocation();
 
@@ -56,29 +60,74 @@ const Meeting = () => {
     };
   }, []);
 
+  const textToSpeech = async (text, language) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language === "English" ? "en-IN" : "hi-IN";
+    utterance.rate = 1;
+    speechSynthesis.speak(utterance);
+  };
+
+  const fetchTranslation = async () => {
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify({
+        source: settingsConfig.speakerLanguage === "English" ? "en" : "hi",
+        target: settingsConfig.speakerLanguage === "English" ? "hi" : "en",
+        message: captions,
+      }),
+    };
+
+    try {
+      const response = await axios(options);
+      console.log(response);
+      textToSpeech(
+        response.data.translated_message,
+        settingsConfig.speakerLanguage
+      );
+    } catch (error) {
+      console.log(error);
+      showToast("Failed to translate", "error");
+    }
+  };
+
   useEffect(() => {
     socket.on("new-user", (data) => {
       console.log(data);
     });
 
     socket.on("push-captions", (data) => {
-      console.log(data);
       setCaptions(data.caption);
+      if (captions.length === captionThreshold) {
+        if (settingsConfig.isTranslationEnabled) {
+          fetchTranslation();
+        }
+      }
     });
 
-    socket.on("stop-captions", (data) => {
-      console.log(data);
-    });
+    // socket.on("stop-captions", (data) => {
+    //   console.log(data);
+    // });
   }, []);
 
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isInRoom, setIsInRoom] = useState(false);
   const [audioStream, setAudioStream] = useState(new MediaStream());
+  const zegoUIKit = useRef(null);
   const zegoEngine = useRef(null);
   const name = location.state?.data?.user?.name ?? "Guest User";
 
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
+
+  // const toggleMute = (state) => {
+  //   if (zegoEngine.current) {
+  //     console.log(ze)
+  //     zegoEngine.current.mediaPlayerSetVolume(0);
+  //   }
+  // };
 
   const MeetingComp = useCallback(
     async (element) => {
@@ -87,6 +136,7 @@ const Meeting = () => {
       const appId = Number(APP_ID);
       const server = APP_SECRET.toString();
       const userID = uuidv4();
+
       const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
         appId,
         server,
@@ -97,7 +147,7 @@ const Meeting = () => {
 
       // Create ZegoUIKit instance
       const zc = ZegoUIKitPrebuilt.create(kitToken);
-      zegoEngine.current = zc; // Store reference to the engine
+      zegoUIKit.current = zc;
 
       // Join the room
       zc.joinRoom({
@@ -115,16 +165,15 @@ const Meeting = () => {
         name: name,
         socketId: socket.id,
       });
+
+      return () => {
+        if (zegoUIKit.current) {
+          zegoUIKit.current.leaveRoom();
+        }
+      };
     },
     [APP_ID, APP_SECRET, id, name, isInRoom]
   );
-
-  const leaveRoom = () => {
-    if (zegoEngine.current) {
-      zegoEngine.current.leaveRoom();
-      setIsInRoom(false); // Reset the state to allow rejoining
-    }
-  };
 
   useEffect(() => {
     if (!isInRoom && streamRef.current) {
@@ -133,8 +182,8 @@ const Meeting = () => {
 
     // Cleanup if the component is unmounted or leaves the room
     return () => {
-      if (isInRoom && zegoEngine.current) {
-        zegoEngine.current.leaveRoom();
+      if (isInRoom && zegoUIKit.current) {
+        zegoUIKit.current.leaveRoom();
         setIsInRoom(false); // Reset state when leaving the room
       }
     };
@@ -166,13 +215,13 @@ const Meeting = () => {
         console.log("RT Transcript: ", transcript);
         if (transcript.length > 100) {
           console.log("Transcript: ", transcript);
-          socket.emit("push-captions", {
-            roomId: id,
-            userId: userId,
-            caption: transcript,
-          });
           resetTranscript();
         }
+        socket.emit("push-captions", {
+          roomId: id,
+          userId: userId,
+          caption: transcript,
+        });
       }
     }
   }, [transcript]);
@@ -185,18 +234,21 @@ const Meeting = () => {
 
   useEffect(() => {
     if (settingsConfig.isCaptionsEnabled) {
-      socket.emit("push-captions", {
-        roomId: id,
-        userId: userId,
-      });
     }
 
     if (settingsConfig.isTranslationEnabled) {
-      socket.emit("start-translation", {
-        roomId: id,
-        isTranslationEnabled: true,
-        speakerLanguage: settingsConfig.speakerLanguage,
-      });
+      // socket.emit("start-translation", {
+      //   roomId: id,
+      //   isTranslationEnabled: true,
+      //   speakerLanguage: settingsConfig.speakerLanguage,
+      // });
+      //toggleMute(true);
+    } else {
+      // socket.emit("stop-translation", {
+      //   roomId: id,
+      //   isTranslationEnabled: false,
+      // });
+      //oggleMute(false);
     }
   }, [settingsConfig]);
 

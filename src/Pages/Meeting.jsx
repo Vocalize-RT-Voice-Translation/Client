@@ -18,6 +18,8 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import axios from "axios";
+import { IoInformationCircle } from "react-icons/io5";
+import { IoMdClose } from "react-icons/io";
 
 const captionThreshold = 100;
 
@@ -41,6 +43,9 @@ const Meeting = () => {
     isTranslationEnabled: false,
     speakerLanguage: "English",
   });
+
+  const [showTranslationNotification, setShowTranslationNotification] =
+    useState(false);
 
   const [modalWidth, setModalWidth] = useState("50%");
 
@@ -93,9 +98,41 @@ const Meeting = () => {
     }
   };
 
+  const mute = () => {
+    const micBtn = document.querySelector("#ZegoRoomMicButton");
+    if (micBtn.classList.contains("false")) {
+      micBtn.click();
+    }
+  };
+
+  const unmute = () => {
+    const micBtn = document.querySelector("#ZegoRoomMicButton");
+    if (!micBtn.classList.contains("false")) {
+      micBtn.click();
+    }
+  };
+
+  useEffect(() => {
+    console.log("showTranslationNotification", showTranslationNotification);
+  }, [showTranslationNotification]);
+
   useEffect(() => {
     socket.on("new-user", (data) => {
       console.log(data);
+    });
+
+    socket.on("start-translation", (data) => {
+      if (data.isTranslationEnabledForRemoteUser) {
+        setShowTranslationNotification(true);
+        mute();
+      }
+    });
+
+    socket.on("stop-translation", (data) => {
+      if (!data.isTranslationEnabledForRemoteUser) {
+        setShowTranslationNotification(false);
+        unmute();
+      }
     });
 
     socket.on("push-captions", (data) => {
@@ -106,10 +143,6 @@ const Meeting = () => {
         }
       }
     });
-
-    // socket.on("stop-captions", (data) => {
-    //   console.log(data);
-    // });
   }, []);
 
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
@@ -165,12 +198,6 @@ const Meeting = () => {
         name: name,
         socketId: socket.id,
       });
-
-      return () => {
-        if (zegoUIKit.current) {
-          zegoUIKit.current.leaveRoom();
-        }
-      };
     },
     [APP_ID, APP_SECRET, id, name, isInRoom]
   );
@@ -179,33 +206,7 @@ const Meeting = () => {
     if (!isInRoom && streamRef.current) {
       MeetingComp(streamRef.current);
     }
-
-    // Cleanup if the component is unmounted or leaves the room
-    return () => {
-      if (isInRoom && zegoUIKit.current) {
-        zegoUIKit.current.leaveRoom();
-        setIsInRoom(false); // Reset state when leaving the room
-      }
-    };
   }, [isInRoom, MeetingComp]);
-
-  const muteOtherPerson = () => {
-    if (zegoEngine.current) {
-      const remoteUsers = zegoEngine.current.getRemoteUsers();
-      if (remoteUsers.length > 0) {
-        remoteUsers.forEach((user) => {
-          if (user.stream && user.stream.getAudioTracks().length > 0) {
-            user.stream.getAudioTracks().forEach((track) => {
-              track.enabled = false; // Disable the audio track
-            });
-            console.log(`Muted audio for user: ${user.userID}`);
-          }
-        });
-      } else {
-        console.log("No remote users connected.");
-      }
-    }
-  };
 
   SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
 
@@ -237,18 +238,16 @@ const Meeting = () => {
     }
 
     if (settingsConfig.isTranslationEnabled) {
-      // socket.emit("start-translation", {
-      //   roomId: id,
-      //   isTranslationEnabled: true,
-      //   speakerLanguage: settingsConfig.speakerLanguage,
-      // });
-      //toggleMute(true);
+      socket.emit("start-translation", {
+        roomId: id,
+        isTranslationEnabled: true,
+        speakerLanguage: settingsConfig.speakerLanguage,
+      });
     } else {
-      // socket.emit("stop-translation", {
-      //   roomId: id,
-      //   isTranslationEnabled: false,
-      // });
-      //oggleMute(false);
+      socket.emit("stop-translation", {
+        roomId: id,
+        isTranslationEnabled: false,
+      });
     }
   }, [settingsConfig]);
 
@@ -404,6 +403,20 @@ const Meeting = () => {
 
   return (
     <div className={styles.main}>
+      {showTranslationNotification && (
+        <div className={styles.notification}>
+          <IoInformationCircle />
+          <p>
+            The other participant has enabled Voice Translation feature. Your
+            Main Mic has been muted for better translation experience.
+          </p>
+          <IoMdClose
+            onClick={() => {
+              setShowTranslationNotification(false);
+            }}
+          />
+        </div>
+      )}
       <Modal
         title={null}
         open={isSettingsVisible}
@@ -469,7 +482,6 @@ const Meeting = () => {
           <p>{captions}</p>
         </div>
       )}
-
       <div className={styles.settingsOverlay}>
         <div
           className={styles.button}

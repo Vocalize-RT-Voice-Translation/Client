@@ -72,9 +72,10 @@ const Meeting = () => {
     speechSynthesis.speak(utterance);
   };
 
-  const fetchTranslation = async () => {
+  const fetchTranslation = async (captions) => {
     const options = {
       method: "POST",
+      url: `${TRANSLATION_ENDPOINT}/translate`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -138,9 +139,13 @@ const Meeting = () => {
     socket.on("push-captions", (data) => {
       setCaptions(data.caption);
       if (captions.length === captionThreshold) {
-        if (settingsConfig.isTranslationEnabled) {
-          fetchTranslation();
-        }
+        setCaptions("");
+      }
+    });
+
+    socket.on("push-translation", (data) => {
+      if (settingsConfig.isTranslationEnabled) {
+        fetchTranslation(data.captions);
       }
     });
   }, []);
@@ -214,8 +219,13 @@ const Meeting = () => {
     if (browserSupportsSpeechRecognition) {
       if (transcript) {
         console.log("RT Transcript: ", transcript);
-        if (transcript.length > 100) {
+        if (transcript.split(" ").length > 20) {
           console.log("Transcript: ", transcript);
+          socket.emit("push-translation", {
+            roomId: id,
+            userId: userId,
+            caption: transcript,
+          });
           resetTranscript();
         }
         socket.emit("push-captions", {

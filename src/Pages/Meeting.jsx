@@ -213,10 +213,9 @@ const Meeting = () => {
     }
   }, [isInRoom, MeetingComp]);
 
-  SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
-
   useEffect(() => {
     if (browserSupportsSpeechRecognition) {
+      SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
       if (transcript) {
         console.log("RT Transcript: ", transcript);
         if (transcript.split(" ").length > 20) {
@@ -233,6 +232,8 @@ const Meeting = () => {
           userId: userId,
           caption: transcript,
         });
+      } else {
+        console.log("No Transcript");
       }
     }
   }, [transcript]);

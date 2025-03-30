@@ -177,8 +177,9 @@ const Meeting = () => {
     });
 
     socket.on("push-translation", (data) => {
+      console.log("Translation Caption Received! : ", data.caption);
       if (settingsConfig.isTranslationEnabled) {
-        fetchTranslation(data.captions);
+        fetchTranslation(data.caption);
       }
     });
   }, []);

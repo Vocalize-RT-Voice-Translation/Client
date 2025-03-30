@@ -6,18 +6,18 @@
   align-items: center;
   justify-content: center;
 
-  >.left {
+  > .left {
     height: 100%;
     width: 30%;
     border-right: 1px solid #0000003c;
 
-    >h2 {
+    > h2 {
       font-size: 1.5rem;
       color: #000000;
       padding: 0 0 0 1rem;
     }
 
-    >.itemWrapper {
+    > .itemWrapper {
       height: 100%;
       display: flex;
       align-items: center;
@@ -26,7 +26,7 @@
       padding: 0 0.5rem 0 0;
       gap: 0.5rem;
 
-      >.item {
+      > .item {
         width: 100%;
         display: flex;
         align-items: center;
@@ -44,7 +44,7 @@
           transition: all 0.15s ease-in-out;
         }
 
-        >svg {
+        > svg {
           font-size: 1.5rem;
           color: #000000c8;
           transition: all 0.15s ease-in-out;
@@ -61,33 +61,33 @@
         }
       }
 
-      >.focused {
+      > .focused {
         background-color: #00000029;
 
         p {
           color: #000000;
         }
 
-        >svg {
+        > svg {
           color: #000000;
         }
       }
     }
   }
 
-  >.right {
+  > .right {
     height: 100%;
     width: 70%;
     margin: 0 1rem;
     overflow-y: auto;
 
-    >h2 {
+    > h2 {
       font-size: 1.5rem;
       color: #000000;
       padding: 0 0 0 1rem;
     }
 
-    >.rightItem {
+    > .rightItem {
       width: 100%;
       padding: 1rem;
       display: flex;
@@ -96,17 +96,17 @@
       flex-direction: column;
       gap: 1rem;
 
-      >.audioWrapper {
+      > .audioWrapper {
         width: 100%;
 
-        >p {
+        > p {
           font-size: 1rem;
           font-weight: 600;
           color: #000000;
           margin: 0.5rem 0;
         }
 
-        >select {
+        > select {
           width: 100%;
           padding: 0.5rem;
           border: 1px solid #0000003c;
@@ -120,17 +120,17 @@
         }
       }
 
-      >.videoWrapper {
+      > .videoWrapper {
         width: 100%;
 
-        >p {
+        > p {
           font-size: 1rem;
           font-weight: 600;
           color: #000000;
           margin: 0.5rem 0;
         }
 
-        >select {
+        > select {
           width: 100%;
           padding: 0.5rem;
           border: 1px solid #0000003c;
@@ -144,78 +144,78 @@
         }
       }
 
-      >.capitonWrapper {
+      > .capitonWrapper {
         display: flex;
         // align-items: center;
         justify-content: center;
 
-        >.info {
-          >h3 {
+        > .info {
+          > h3 {
             font-size: 1.15rem;
             color: #000000;
             margin: 0.25rem 0;
           }
 
-          >p {
+          > p {
             font-size: 1rem;
             color: #000000;
             margin: 0.5rem 0;
 
-            >b {
+            > b {
               font-size: 0.8rem;
             }
           }
         }
 
-        >.switch {
+        > .switch {
           margin: 0.25rem 0 0 0;
         }
       }
 
-      >.translationWrapper {
+      > .translationWrapper {
         display: flex;
         justify-content: center;
         flex-direction: column;
 
-        >.headingWrapper {
+        > .headingWrapper {
           display: flex;
           justify-content: center;
 
           .heading {
-            >h3 {
+            > h3 {
               font-size: 1.15rem;
               color: #000000;
               margin: 0.25rem 0;
             }
 
-            >p {
+            > p {
               font-size: 1rem;
               color: #000000;
               margin: 0.5rem 0;
 
-              >b {
+              > b {
                 font-size: 0.8rem;
               }
             }
           }
 
-          >.switch {
+          > .switch {
             margin: 0.25rem 0 0 0;
           }
         }
 
-        >.optionsWrapper {
-          >.languageSelector {
+        > .optionsWrapper {
+          > .languageSelector {
             width: 100%;
 
-            >p {
+            > p {
               font-size: 1rem;
               font-weight: 600;
               color: #000000;
               margin: 0.5rem 0;
             }
 
-            >select {
+            > select {
               width: 100%;
               padding: 0.5rem;
               border: 1px solid #0000003c;
@@ -249,41 +249,38 @@
   position: relative;
   overflow: hidden;
 
-  >.notification {
+  > .notification {
     position: absolute;
-    top: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 1rem 2rem;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.75rem 2rem;
     background-color: rgba(255, 255, 255, 0.241);
-    border-radius: 2rem;
-    height: auto;
+    border-radius: 1rem;
+    height: fit-content;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    max-width: 75%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    min-width: 20rem;
+    width: fit-content;
     z-index: 10000;
 
-    >svg {
-      font-size: 1.5rem;
+    > svg {
       color: #ffffff;
       margin-right: 0.5rem;
 
-      &:nth-child(3) {
-        font-size: 1.25rem;
-        margin-left: 1.5rem;
+      &:nth-child(2) {
+        margin-left: 1rem;
         cursor: pointer;
       }
     }
 
-    >p {
-      font-size: .9rem;
+    > p {
+      font-size: 0.9rem;
       color: #ffffff;
-      white-space: nowrap;
     }
   }
 
-  >.captions {
+  > .captions {
     pointer-events: none;
     position: fixed;
     top: 0;
@@ -299,7 +296,7 @@
     justify-content: center;
     z-index: 100;
 
-    >p {
+    > p {
       max-width: 75%;
       margin: 0 0 7rem 0;
       font-size: 1.5vw;
@@ -307,17 +304,17 @@
     }
   }
 
-  >div {
+  > div {
     height: 100vh;
     max-height: 100vh;
 
-    >div>div>div {
+    > div > div > div {
       border-radius: 0;
       box-shadow: none;
     }
   }
 
-  >.settingsOverlay {
+  > .settingsOverlay {
     position: absolute;
     left: -1vw;
     top: 50%;
@@ -342,7 +339,7 @@
       left: 2vw;
     }
 
-    >.button {
+    > .button {
       width: 100%;
       aspect-ratio: 1;
       display: flex;
@@ -351,7 +348,7 @@
       transition: all 0.2s ease-in-out;
       position: relative;
 
-      >svg {
+      > svg {
         font-size: 1.75rem;
         color: #ffffff;
         transition: all 0.2s ease-in-out;
@@ -371,7 +368,7 @@
         }
       }
 
-      >.dot {
+      > .dot {
         position: absolute;
         top: 1.5rem;
         right: 1.5rem;
@@ -386,7 +383,7 @@
       &:hover {
         background-color: #ffffff;
 
-        >svg {
+        > svg {
           color: var(--bg);
         }
       }

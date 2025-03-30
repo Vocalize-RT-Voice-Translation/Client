@@ -67,11 +67,12 @@ const Meeting = () => {
     };
   }, []);
 
-  const textToSpeech = async (text, language) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === "English" ? "en-IN" : "hi-IN";
-    utterance.rate = 1;
-    speechSynthesis.speak(utterance);
+  const speakText = (text, language) => {
+    if (language === "English") {
+      window.responsiveVoice.speak(text, "Hindi Male");
+    } else {
+      window.responsiveVoice.speak(text, "UK English Male");
+    }
   };
 
   const fetchTranslation = async (captions) => {
@@ -91,7 +92,7 @@ const Meeting = () => {
     try {
       const response = await axios(options);
       console.log(response);
-      textToSpeech(
+      speakText(
         response.data.translated_message,
         settingsConfig.speakerLanguage
       );
@@ -158,6 +159,10 @@ const Meeting = () => {
     socket.on("start-translation", (data) => {
       if (data.isTranslationEnabledForRemoteUser) {
         setShowTranslationNotification(true);
+        showToast(
+          "Your Voice is now being translated for other user",
+          "success"
+        );
         mute();
       }
     });
@@ -440,20 +445,6 @@ const Meeting = () => {
 
   return (
     <div className={styles.main}>
-      {showTranslationNotification && (
-        <div className={styles.notification}>
-          <IoInformationCircle />
-          <p>
-            The other participant has enabled Voice Translation feature. Your
-            Main Mic has been muted for better translation experience.
-          </p>
-          <IoMdClose
-            onClick={() => {
-              setShowTranslationNotification(false);
-            }}
-          />
-        </div>
-      )}
       <Modal
         title={null}
         open={isSettingsVisible}
@@ -514,6 +505,17 @@ const Meeting = () => {
           e.preventDefault();
         }}
       />
+      {showTranslationNotification && (
+        <div className={styles.notification}>
+          <p>Your Voice is now being translated for other user</p>
+          <IoMdClose
+            onClick={() => {
+              setShowTranslationNotification(false);
+            }}
+            size={20}
+          />
+        </div>
+      )}
       {settingsConfig.isCaptionsEnabled && showCaptions && (
         <div className={styles.captions}>
           <p>{captions}</p>

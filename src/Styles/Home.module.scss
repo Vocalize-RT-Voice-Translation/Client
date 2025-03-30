@@ -1,191 +1,191 @@
-@use 'sass:math';
+@use "sass:math";
 
 .main {
-	width: 100%;
-	padding: 1rem;
-	min-height: 100vh;
-	background-color: var(--bg);
-	background-image: url('../Assets/bg.svg');
-	background-size: cover;
-	background-position: center;
-	background-repeat: no-repeat;
+  width: 100%;
+  padding: 1rem;
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image: url("../Assets/bg.svg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 
-	> .hero {
-		width: 100%;
-		height: 80vh;
-		margin: 1rem 0;
-		display: flex;
-		padding: 0 3rem;
+  > .hero {
+    width: 100%;
+    height: 80vh;
+    margin: 1rem 0;
+    display: flex;
+    padding: 0 3rem;
 
-		> .left {
-			padding: 1rem 2.5rem;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex-direction: column;
-			width: 50%;
+    > .left {
+      padding: 1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      width: 50%;
 
-			> h2 {
-				font-size: 5.75vw;
-				font-weight: 700;
-				color: rgb(255, 255, 255);
-				width: 100%;
-				letter-spacing: 0.015rem;
-				line-height: 6vw;
-			}
+      > h2 {
+        font-size: 5.75vw;
+        font-weight: 700;
+        color: rgb(255, 255, 255);
+        width: 100%;
+        letter-spacing: 0.015rem;
+        line-height: 6vw;
+      }
 
-			> p {
-				font-size: 1.25rem;
-				color: #ffffffdd;
-				width: 100%;
-				margin: 2.5rem 0 0 0;
-				line-height: 2rem;
-			}
+      > p {
+        font-size: 1.25rem;
+        color: #ffffffdd;
+        width: 100%;
+        margin: 2.5rem 0 0 0;
+        line-height: 2rem;
+      }
 
-			> .buttonWrapper {
-				margin: 2rem 0;
-				display: flex;
-				align-items: center;
-				width: 100%;
-				gap: 2rem;
+      > .buttonWrapper {
+        margin: 2rem 0;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 2rem;
 
-				> .button {
-					background-color: orange;
-					color: white;
-					padding: 1rem 3rem;
-					font-weight: 600;
-					font-size: 1rem;
-					border-radius: 10rem;
-					border: 1px solid transparent;
-					transition: all 0.15s ease-in-out;
+        > .button {
+          background-color: orange;
+          color: white;
+          padding: 1rem 3rem;
+          font-weight: 600;
+          font-size: 1rem;
+          border-radius: 10rem;
+          border: 1px solid transparent;
+          transition: all 0.15s ease-in-out;
 
-					&:hover {
-						background-color: transparent;
-						border: 1px solid orange;
-						cursor: pointer;
-					}
-				}
+          &:hover {
+            background-color: transparent;
+            border: 1px solid orange;
+            cursor: pointer;
+          }
+        }
 
-				> p {
-					color: #ffffffdd;
-					font-size: 1rem;
-					font-weight: 500;
-					cursor: pointer;
-				}
-			}
-		}
+        > p {
+          color: #ffffffdd;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+        }
+      }
+    }
 
-		> .right {
-			width: 50%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
+    > .right {
+      width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-			> img {
-				width: 75%;
-				height: auto;
-				border-radius: 1rem;
-				mix-blend-mode: difference;
-			}
-		}
-	}
+      > img {
+        width: 75%;
+        height: auto;
+        border-radius: 1rem;
+        mix-blend-mode: difference;
+      }
+    }
+  }
 }
 
 @media (min-width: 200px) and (max-width: 1024px) {
-	.main {
-		width: 100%;
-		padding: 1rem;
-		min-height: 100vh;
-		background-color: var(--bg);
-		background-image: url('../Assets/bg.svg');
-		background-size: cover;
-		background-position: center;
-		background-repeat: no-repeat;
+  .main {
+    width: 100%;
+    padding: 1rem;
+    min-height: 100vh;
+    background-color: var(--bg);
+    background-image: url("../Assets/bg.svg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 
-		> .hero {
-			width: 100%;
-			min-height: 80vh;
-			margin: 1rem 0;
-			display: flex;
-			flex-direction: column-reverse;
-			padding: 0;
-			height: auto;
+    > .hero {
+      width: 100%;
+      min-height: 80vh;
+      margin: 1rem 0;
+      display: flex;
+      flex-direction: column-reverse;
+      padding: 0;
+      height: auto;
 
-			> .left {
-				padding: 0rem;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				flex-direction: column;
-				width: 100%;
+      > .left {
+        padding: 0rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        width: 100%;
 
-				> h2 {
-					font-size: 8vw;
-					font-weight: 700;
-					color: rgb(255, 255, 255);
-					width: 100%;
-					letter-spacing: 0.015rem;
-					line-height: normal;
-					margin: 2rem 0 0 0;
-				}
+        > h2 {
+          font-size: 8vw;
+          font-weight: 700;
+          color: rgb(255, 255, 255);
+          width: 100%;
+          letter-spacing: 0.015rem;
+          line-height: normal;
+          margin: 2rem 0 0 0;
+        }
 
-				> p {
-					font-size: 1rem;
-					color: #ffffffdd;
-					width: 100%;
-					margin: 1.25rem 0 0 0;
-					line-height: normal;
-				}
+        > p {
+          font-size: 1rem;
+          color: #ffffffdd;
+          width: 100%;
+          margin: 1.25rem 0 0 0;
+          line-height: normal;
+        }
 
-				> .buttonWrapper {
-					margin: 1.5rem 0;
-					display: flex;
-					align-items: center;
-					justify-content: flex-start;
-					width: 100%;
-					gap: 1rem;
+        > .buttonWrapper {
+          margin: 1.5rem 0;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          width: 100%;
+          gap: 1rem;
 
-					> .button {
-						background-color: orange;
-						color: white;
-						padding: 1rem 3rem;
-						font-weight: 600;
-						font-size: 1rem;
-						border-radius: 10rem;
-						border: 1px solid transparent;
-						transition: all 0.15s ease-in-out;
+          > .button {
+            background-color: orange;
+            color: white;
+            padding: 1rem 3rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 10rem;
+            border: 1px solid transparent;
+            transition: all 0.15s ease-in-out;
 
-						&:hover {
-							background-color: transparent;
-							border: 1px solid orange;
-							cursor: pointer;
-						}
-					}
+            &:hover {
+              background-color: transparent;
+              border: 1px solid orange;
+              cursor: pointer;
+            }
+          }
 
-					> p {
-						color: #ffffffdd;
-						font-size: 1rem;
-						font-weight: 500;
-						cursor: pointer;
-					}
-				}
-			}
+          > p {
+            color: #ffffffdd;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+          }
+        }
+      }
 
-			> .right {
-				height: 100%;
-				width: 100%;
-				display: flex;
-				align-items: center;
-				justify-content: flex-end;
-				padding: 1rem;
+      > .right {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1rem;
 
-				> img {
-					width: 100%;
-					height: auto;
-					border-radius: 1rem;
-					mix-blend-mode: difference;
-				}
-			}
-		}
-	}
+        > img {
+          width: 100%;
+          height: auto;
+          border-radius: 1rem;
+          mix-blend-mode: difference;
+        }
+      }
+    }
+  }
 }

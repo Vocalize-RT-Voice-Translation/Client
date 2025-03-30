@@ -1,93 +1,96 @@
-import React, { useEffect } from 'react';
-import styles from '../Styles/Home.module.scss';
-import Navbar from '../Components/Navbar.jsx';
-import hero from '../Assets/hero-img.svg';
-import FeatureOne from '../Components/FeatureOne.jsx';
-import LocomotiveScroll from 'locomotive-scroll';
-import Meet from '../Components/Meet.jsx';
-import Animation from '../Components/Animation.jsx';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import styles from "../Styles/Home.module.scss";
+import Navbar from "../Components/Navbar.jsx";
+import hero from "../Assets/hero-img.svg";
+import FeatureOne from "../Components/FeatureOne.jsx";
+import LocomotiveScroll from "locomotive-scroll";
+import Meet from "../Components/Meet.jsx";
+import Animation from "../Components/Animation.jsx";
+import { useNavigate } from "react-router-dom";
+import ModalVideo from "react-modal-video";
+import "../../node_modules/react-modal-video/scss/modal-video.scss";
 
 const Home = () => {
-	const navigate = useNavigate();
-	useEffect(() => {
-		const locomotiveScroll = new LocomotiveScroll({
-			smooth: true,
-			smoothMobile: true,
-			getDirection: true,
-			getSpeed: true,
-			easing: [0.25, 0.0, 0.35, 1.0],
-		});
+  const navigate = useNavigate();
+  const [isOpen, setOpen] = useState(false);
 
-		return () => {
-			if (locomotiveScroll)
-				locomotiveScroll.destroy();
-		};
-	}, []);
+  useEffect(() => {
+    const locomotiveScroll = new LocomotiveScroll({
+      smooth: true,
+      smoothMobile: true,
+      getDirection: true,
+      getSpeed: true,
+      easing: [0.25, 0.0, 0.35, 1.0],
+    });
 
-	const disableImageDrag = (e) => {
-		e.preventDefault();
-	};
+    return () => {
+      if (locomotiveScroll) locomotiveScroll.destroy();
+    };
+  }, []);
 
-	useEffect(() => {
-		const images = document.querySelectorAll('img');
-		images.forEach((image) => {
-			image.addEventListener(
-				'dragstart',
-				disableImageDrag
-			);
-		});
+  const disableImageDrag = (e) => {
+    e.preventDefault();
+  };
 
-		return () => {
-			images.forEach((image) => {
-				image.removeEventListener(
-					'dragstart',
-					disableImageDrag
-				);
-			});
-		};
-	}, []);
+  useEffect(() => {
+    const images = document.querySelectorAll("img");
+    images.forEach((image) => {
+      image.addEventListener("dragstart", disableImageDrag);
+    });
 
-	return (
-		<>
-			<div className={styles.main}>
-				<Navbar />
-				<div className={styles.hero}>
-					<div className={styles.left}>
-						<h2>
-							Meet without worrying about language
-						</h2>
-						<p>
-							Use Vocalize to get a new experience in
-							doing video meet, don't care about
-							language, you can set it in Settings
-							section.
-						</p>
-						<div className={styles.buttonWrapper}>
-							<div
-								className={styles.button}
-								onClick={() => {
-									navigate('/meeting');
-								}}
-							>
-								Try Vocalize
-							</div>
-							<p>Watch the Demo</p>
-						</div>
-					</div>
-					<div className={styles.right}>
-						<img
-							src={hero}
-							alt=''
-						/>
-					</div>
-				</div>
-			</div>
-			<FeatureOne />
-			<Meet />
-			<Animation />
-		</>
-	);
+    return () => {
+      images.forEach((image) => {
+        image.removeEventListener("dragstart", disableImageDrag);
+      });
+    };
+  }, []);
+
+  return (
+    <>
+      <div className={styles.main}>
+        <ModalVideo
+          channel="youtube"
+          youtube={{ mute: 0, autoplay: 1 }}
+          isOpen={isOpen}
+          videoId="e1edxTqJnKk"
+          onClose={() => setOpen(false)}
+        />
+        <Navbar />
+        <div className={styles.hero}>
+          <div className={styles.left}>
+            <h2>Meet without worrying about language</h2>
+            <p>
+              Use Vocalize to get a new experience in doing 1-1 video calls,
+              meetings, and conferences. We'll take care of the language.
+            </p>
+            <div className={styles.buttonWrapper}>
+              <div
+                className={styles.button}
+                onClick={() => {
+                  navigate("/meeting");
+                }}
+              >
+                Try Vocalize
+              </div>
+              <p
+                onClick={() => {
+                  setOpen(true);
+                }}
+              >
+                Watch the Demo
+              </p>
+            </div>
+          </div>
+          <div className={styles.right}>
+            <img src={hero} alt="" />
+          </div>
+        </div>
+      </div>
+      <FeatureOne />
+      <Meet />
+      <Animation />
+    </>
+  );
 };
 
 export default Home;

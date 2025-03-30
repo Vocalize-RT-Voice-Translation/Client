@@ -20,6 +20,7 @@ import SpeechRecognition, {
 import axios from "axios";
 import { IoInformationCircle } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
+import UserStatus from "../Components/DetectUserStatus.jsx";
 
 const captionThreshold = 100;
 
@@ -29,7 +30,9 @@ const Meeting = () => {
   const { APP_ID, APP_SECRET, TRANSLATION_ENDPOINT } = secrets;
   const { id } = useParams();
   const location = useLocation();
+  const { micStatus, camStatus } = useDetectUserStatus();
 
+  const [lastCaptionTime, setLastCaptionTime] = useState(Date.now());
   const [itemVisible, setItemVisible] = useState("Media Devices");
 
   const [roomState, setRoomState] = useState("pre-meeting");
@@ -118,6 +121,25 @@ const Meeting = () => {
   }, [showTranslationNotification]);
 
   useEffect(() => {
+    setLastCaptionTime(Date.now());
+  }, [captions]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (Date.now() - lastCaptionTime >= 3000) {
+        setCaptions("");
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastCaptionTime]);
+
+  useEffect(() => {
+    console.log("Mic Status: ", micStatus);
+    console.log("Cam Status: ", camStatus);
+  }, [micStatus, camStatus]);
+
+  useEffect(() => {
     socket.on("new-user", (data) => {
       console.log(data);
     });
@@ -147,6 +169,10 @@ const Meeting = () => {
       if (settingsConfig.isTranslationEnabled) {
         fetchTranslation(data.captions);
       }
+    });
+
+    socket.on("user-status", (data) => {
+      console.log(data);
     });
   }, []);
 

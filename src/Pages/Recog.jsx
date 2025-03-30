@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -16,6 +16,16 @@ const SpeechTranscription = () => {
   if (!browserSupportsSpeechRecognition) {
     return <p>Browser doesn't support speech recognition.</p>;
   }
+
+  const speakText = (text) => {
+    window.responsiveVoice.speak(text, "UK English Male"); // Change to "UK English Female"
+  };
+
+  useEffect(() => {
+    speakText(
+      "Welcome to Real-Time Speech Transcription. This is a demo of real-time speech transcription using the Web Speech API."
+    );
+  }, []);
 
   return isBrave ? (
     <div>

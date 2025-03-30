@@ -20,7 +20,7 @@ import SpeechRecognition, {
 import axios from "axios";
 import { IoInformationCircle } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
-import UserStatus from "../Components/DetectUserStatus.jsx";
+import useDetectUserStatus from "../Components/DetectUserStatus.jsx";
 
 const captionThreshold = 100;
 

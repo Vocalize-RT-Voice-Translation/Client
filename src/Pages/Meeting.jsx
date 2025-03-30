@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import secrets from "../../secrets.js";
 import styles from "../Styles/Meeting.module.scss";
-import { ZegoUIKitPrebuilt, ZegoUIKit } from "@zegocloud/zego-uikit-prebuilt";
-import { ZegoExpressEngine } from "zego-express-engine-webrtc"; // Import ZegoExpressEngine
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { v4 as uuidv4 } from "uuid";
 import { BsTranslate } from "react-icons/bs";
 import { BiCaptions } from "react-icons/bi";
@@ -35,9 +34,9 @@ const Meeting = () => {
   const [lastCaptionTime, setLastCaptionTime] = useState(Date.now());
   const [itemVisible, setItemVisible] = useState("Media Devices");
 
-  const [roomState, setRoomState] = useState("pre-meeting");
-  const [localSpeech, setLocalSpeech] = useState("");
   const [captions, setCaptions] = useState("");
+
+  const [showCaptions, setShowCaptions] = useState(true);
 
   const streamRef = useRef(null);
 
@@ -135,13 +134,25 @@ const Meeting = () => {
   }, [lastCaptionTime]);
 
   useEffect(() => {
-    console.log("Mic Status: ", micStatus);
-    console.log("Cam Status: ", camStatus);
+    socket.emit("user-status", {
+      roomId: id,
+      userId: userId,
+      isMicOn: micStatus,
+      isCameraOn: camStatus,
+    });
   }, [micStatus, camStatus]);
 
   useEffect(() => {
     socket.on("new-user", (data) => {
       console.log(data);
+    });
+
+    socket.on("user-status", (data) => {
+      if (data.isMicOn == false) {
+        setShowCaptions(false);
+      } else {
+        setShowCaptions(true);
+      }
     });
 
     socket.on("start-translation", (data) => {
@@ -170,28 +181,16 @@ const Meeting = () => {
         fetchTranslation(data.captions);
       }
     });
-
-    socket.on("user-status", (data) => {
-      console.log(data);
-    });
   }, []);
 
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isInRoom, setIsInRoom] = useState(false);
   const [audioStream, setAudioStream] = useState(new MediaStream());
   const zegoUIKit = useRef(null);
-  const zegoEngine = useRef(null);
   const name = location.state?.data?.user?.name ?? "Guest User";
 
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
-
-  // const toggleMute = (state) => {
-  //   if (zegoEngine.current) {
-  //     console.log(ze)
-  //     zegoEngine.current.mediaPlayerSetVolume(0);
-  //   }
-  // };
 
   const MeetingComp = useCallback(
     async (element) => {
@@ -514,7 +513,7 @@ const Meeting = () => {
           e.preventDefault();
         }}
       />
-      {settingsConfig.isCaptionsEnabled && (
+      {settingsConfig.isCaptionsEnabled && showCaptions && (
         <div className={styles.captions}>
           <p>{captions}</p>
         </div>

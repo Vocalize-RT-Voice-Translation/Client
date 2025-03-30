@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const useDetectUserStatus = () => {
-  const micStatus = useRef(false);
-  const camStatus = useRef(false);
+  const [micStatus, setMicStatus] = useState(false);
+  const [camStatus, setCamStatus] = useState(false);
 
   useEffect(() => {
     const detectUserStatus = () => {
@@ -10,37 +10,63 @@ const useDetectUserStatus = () => {
       const cam = document.querySelector("#ZegoRoomCameraButton");
 
       if (mic) {
-        micStatus.current = mic.classList.contains("false");
+        setMicStatus(mic.classList.contains("false"));
       }
 
       if (cam) {
-        camStatus.current = cam.classList.contains("false");
+        setCamStatus(cam.classList.contains("false"));
       }
-
-      console.log("Mic Status: ", micStatus.current);
-      console.log("Cam Status: ", camStatus.current);
     };
 
-    const observer = new MutationObserver(() => detectUserStatus());
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "class"
+        ) {
+          detectUserStatus(); // Run whenever class changes
+        }
+      }
+    });
 
-    const micElement = document.querySelector("#ZegoRoomMicButton");
-    const camElement = document.querySelector("#ZegoRoomCameraButton");
+    const observeElement = (element) => {
+      if (element) {
+        observer.observe(element, {
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+      }
+    };
 
-    if (micElement) {
-      observer.observe(micElement, {
-        attributes: true,
-        attributeFilter: ["class"],
-      });
-    }
+    // Initial check
+    detectUserStatus();
 
-    if (camElement) {
-      observer.observe(camElement, {
-        attributes: true,
-        attributeFilter: ["class"],
-      });
-    }
+    let micElement = document.querySelector("#ZegoRoomMicButton");
+    let camElement = document.querySelector("#ZegoRoomCameraButton");
 
-    return () => observer.disconnect();
+    observeElement(micElement);
+    observeElement(camElement);
+
+    // Handle dynamic elements appearing later
+    const checkElementsExist = setInterval(() => {
+      micElement = document.querySelector("#ZegoRoomMicButton");
+      camElement = document.querySelector("#ZegoRoomCameraButton");
+
+      if (micElement && !micElement.dataset.observed) {
+        observeElement(micElement);
+        micElement.dataset.observed = "true";
+      }
+
+      if (camElement && !camElement.dataset.observed) {
+        observeElement(camElement);
+        camElement.dataset.observed = "true";
+      }
+    }, 1000); // Re-check every second if elements are missing
+
+    return () => {
+      observer.disconnect();
+      clearInterval(checkElementsExist);
+    };
   }, []);
 
   return { micStatus, camStatus };

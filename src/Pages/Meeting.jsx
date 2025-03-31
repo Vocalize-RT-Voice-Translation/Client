@@ -19,6 +19,7 @@ import SpeechRecognition, {
 import axios from "axios";
 import { IoMdClose } from "react-icons/io";
 import useDetectUserStatus from "../Components/DetectUserStatus.jsx";
+import useTranslationQueue from "../Components/UseTranslationQueue.jsx";
 
 const captionThreshold = 100;
 
@@ -55,6 +56,11 @@ const Meeting = () => {
     audioStream.getTracks().forEach((track) => track.stop());
   };
 
+  const { addToQueue } = useTranslationQueue(
+    settingsConfig,
+    TRANSLATION_ENDPOINT
+  );
+
   useEffect(() => {
     const getWindowWidth = () => {
       setModalWidth(window.innerWidth < 768 ? "100%" : "50%");
@@ -75,6 +81,11 @@ const Meeting = () => {
   };
 
   const fetchTranslation = async (captions) => {
+    if (!captions.trim()) {
+      console.warn("Empty captions, skipping translation...");
+      return;
+    }
+
     const options = {
       method: "POST",
       url: `${TRANSLATION_ENDPOINT}/translate`,
@@ -90,13 +101,18 @@ const Meeting = () => {
 
     try {
       const response = await axios(options);
-      console.log(response);
-      speakText(
-        response.data.translated_message,
-        settingsConfig.speakerLanguage
-      );
+      if (response.data && response.data.translated_message) {
+        console.log("Translation Response:", response.data.translated_message);
+        speakText(
+          response.data.translated_message,
+          settingsConfig.speakerLanguage
+        );
+      } else {
+        console.warn("No translated message received!");
+        showToast("Translation service returned empty response", "warning");
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Translation failed:", error);
       showToast("Failed to translate", "error");
     }
   };
@@ -181,10 +197,9 @@ const Meeting = () => {
     });
 
     socket.on("push-translation", (data) => {
-      console.log("Translation Caption Received! : ", data.caption);
       if (settingsConfig.isTranslationEnabled) {
-        console.log("hii this is here");
-        fetchTranslation(data.caption);
+        console.log("Received translation caption:", data.caption);
+        addToQueue(data.caption);
       }
     });
   }, []);

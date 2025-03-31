@@ -17,7 +17,6 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import axios from "axios";
-import { IoInformationCircle } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 import useDetectUserStatus from "../Components/DetectUserStatus.jsx";
 
@@ -184,6 +183,7 @@ const Meeting = () => {
     socket.on("push-translation", (data) => {
       console.log("Translation Caption Received! : ", data.caption);
       if (settingsConfig.isTranslationEnabled) {
+        console.log("hii this is here");
         fetchTranslation(data.caption);
       }
     });

@@ -197,6 +197,8 @@ const Meeting = () => {
     });
 
     socket.on("push-translation", (data) => {
+      console.log("Translation Enabled", settingsConfig.isTranslationEnabled);
+      console.log("Received translation caption:", data.caption);
       if (settingsConfig.isTranslationEnabled) {
         console.log("Received translation caption:", data.caption);
         addToQueue(data.caption);

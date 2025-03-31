@@ -17,9 +17,9 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import axios from "axios";
+import { IoInformationCircle } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 import useDetectUserStatus from "../Components/DetectUserStatus.jsx";
-import useTranslationQueue from "../Components/UseTranslationQueue.jsx";
 
 const captionThreshold = 100;
 
@@ -56,11 +56,6 @@ const Meeting = () => {
     audioStream.getTracks().forEach((track) => track.stop());
   };
 
-  const { addToQueue } = useTranslationQueue(
-    settingsConfig,
-    TRANSLATION_ENDPOINT
-  );
-
   useEffect(() => {
     const getWindowWidth = () => {
       setModalWidth(window.innerWidth < 768 ? "100%" : "50%");
@@ -81,11 +76,6 @@ const Meeting = () => {
   };
 
   const fetchTranslation = async (captions) => {
-    if (!captions.trim()) {
-      console.warn("Empty captions, skipping translation...");
-      return;
-    }
-
     const options = {
       method: "POST",
       url: `${TRANSLATION_ENDPOINT}/translate`,
@@ -101,18 +91,13 @@ const Meeting = () => {
 
     try {
       const response = await axios(options);
-      if (response.data && response.data.translated_message) {
-        console.log("Translation Response:", response.data.translated_message);
-        speakText(
-          response.data.translated_message,
-          settingsConfig.speakerLanguage
-        );
-      } else {
-        console.warn("No translated message received!");
-        showToast("Translation service returned empty response", "warning");
-      }
+      console.log(response);
+      speakText(
+        response.data.translated_message,
+        settingsConfig.speakerLanguage
+      );
     } catch (error) {
-      console.error("Translation failed:", error);
+      console.log(error);
       showToast("Failed to translate", "error");
     }
   };
@@ -159,6 +144,7 @@ const Meeting = () => {
   }, [micStatus, camStatus]);
 
   useEffect(() => {
+    SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
     socket.on("new-user", (data) => {
       console.log(data);
     });
@@ -197,11 +183,9 @@ const Meeting = () => {
     });
 
     socket.on("push-translation", (data) => {
-      console.log("Translation Enabled", settingsConfig.isTranslationEnabled);
-      console.log("Received translation caption:", data.caption);
+      console.log("Translation Caption Received! : ", data.caption);
       if (settingsConfig.isTranslationEnabled) {
-        console.log("Received translation caption:", data.caption);
-        addToQueue(data.caption);
+        fetchTranslation(data.caption);
       }
     });
   }, []);
@@ -263,7 +247,6 @@ const Meeting = () => {
 
   useEffect(() => {
     if (browserSupportsSpeechRecognition) {
-      SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
       if (transcript) {
         console.log("RT Transcript: ", transcript);
         if (transcript.split(" ").length > 20) {

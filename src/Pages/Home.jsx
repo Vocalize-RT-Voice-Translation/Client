@@ -52,7 +52,7 @@ const Home = () => {
           channel="youtube"
           youtube={{ mute: 0, autoplay: 1 }}
           isOpen={isOpen}
-          videoId="e1edxTqJnKk"
+          videoId="99bwj5wbi4c"
           onClose={() => setOpen(false)}
         />
         <Navbar />

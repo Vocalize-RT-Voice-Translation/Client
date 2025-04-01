@@ -1,16 +1,50 @@
-import { useEffect, useRef } from "react";
-import { useSpeechRecognition } from "react-speech-recognition";
+import React, { useEffect, useCallback } from "react";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
-export const SpeechHandler = ({ onTranscriptUpdate }) => {
-  const { transcript, resetTranscript } = useSpeechRecognition();
-  const transcriptRef = useRef("");
+const useSpeechHandler = (language = "en-IN") => {
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+
+  const startListening = useCallback(() => {
+    SpeechRecognition.startListening({
+      continuous: true,
+      interimResults: true,
+      language,
+    });
+  }, [language]);
+
+  const stopListening = useCallback(() => {
+    SpeechRecognition.stopListening();
+  }, []);
+
+  const reset = useCallback(() => {
+    resetTranscript();
+  }, [resetTranscript]);
 
   useEffect(() => {
-    if (!transcript || transcript === transcriptRef.current) return;
-    transcriptRef.current = transcript;
+    if (browserSupportsSpeechRecognition) {
+      startListening();
+    }
 
-    onTranscriptUpdate(transcript, resetTranscript);
-  }, [transcript, onTranscriptUpdate]);
+    return () => {
+      SpeechRecognition.stopListening();
+    };
+  }, [language, startListening, browserSupportsSpeechRecognition]);
 
-  return null; // No UI needed
+  return {
+    transcript,
+    listening,
+    startListening,
+    stopListening,
+    reset,
+    browserSupportsSpeechRecognition,
+  };
 };
+
+export default useSpeechHandler;

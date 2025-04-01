@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, memo } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import secrets from "../../secrets.js";
 import styles from "../Styles/Meeting.module.scss";
@@ -9,19 +9,153 @@ import { BiCaptions } from "react-icons/bi";
 import { BsCcCircle } from "react-icons/bs";
 import { BsStars } from "react-icons/bs";
 import { Modal, Switch } from "antd";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { useConnections } from "./SocketPeerContext.jsx";
 import { showToast } from "../Utils/toast.js";
 import { createUserId } from "../Utils/helper.js";
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
 import axios from "axios";
-import { IoInformationCircle } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 import useDetectUserStatus from "../Components/DetectUserStatus.jsx";
+import useSpeechHandler from "../Components/SpeechHandler.jsx";
 
 const captionThreshold = 100;
+
+const Settings = memo(
+  ({
+    isCaptionsEnabled,
+    isTranslationEnabled,
+    myLanguage,
+    setCaptionsEnabled,
+    setTranslationEnabled,
+    setLanguage,
+    roomId,
+    socket,
+  }) => {
+    const [itemVisible, setItemVisible] = useState("Captions");
+
+    useEffect(() => {
+      if (isTranslationEnabled) {
+        socket.emit("start-translation", {
+          roomId,
+          isTranslationEnabled: true,
+        });
+      } else {
+        socket.emit("stop-translation", {
+          roomId,
+          isTranslationEnabled: false,
+        });
+      }
+      if (isCaptionsEnabled) {
+        socket.emit("start-captions", {
+          roomId,
+          isCaptionsEnabled: true,
+        });
+      } else {
+        socket.emit("stop-captions", {
+          roomId,
+          isCaptionsEnabled: false,
+        });
+      }
+    }, [isTranslationEnabled, isCaptionsEnabled, roomId, socket]);
+
+    const handleCaptionsToggle = useCallback(
+      (checked) => {
+        setCaptionsEnabled(checked);
+      },
+      [setCaptionsEnabled]
+    );
+
+    const handleTranslationToggle = useCallback(
+      (checked) => {
+        setTranslationEnabled(checked);
+      },
+      [setTranslationEnabled]
+    );
+
+    const handleLanguageChange = useCallback(
+      (e) => {
+        setLanguage(e.target.value);
+      },
+      [setLanguage]
+    );
+
+    const leftItems = [
+      { title: "Captions", icon: <BsCcCircle /> },
+      { title: "Translation", icon: <BsTranslate /> },
+    ];
+
+    return (
+      <div className={styles.modalSettings}>
+        <div className={styles.left}>
+          <h2>Settings</h2>
+          <div className={styles.itemWrapper}>
+            {leftItems.map((item, index) => (
+              <div
+                key={index}
+                className={`${styles.item} ${
+                  itemVisible === item.title ? styles.focused : ""
+                }`}
+                onClick={() => setItemVisible(item.title)}
+              >
+                {item.icon}
+                <p>{item.title}</p>
+                {item.title === "Translation" && <BsStars />}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.right}>
+          <h2>{itemVisible}</h2>
+          {itemVisible === "Captions" ? (
+            <div className={styles.rightItem}>
+              <div className={styles.capitonWrapper}>
+                <div className={styles.info}>
+                  <h3>Enable Realtime Captions</h3>
+                  <p>
+                    Realtime captions identify speech and convert it to text.{" "}
+                    <b>(Supports English & Hindi only)</b>.
+                  </p>
+                </div>
+                <Switch
+                  className={styles.switch}
+                  checked={isCaptionsEnabled}
+                  onChange={handleCaptionsToggle}
+                />
+              </div>
+            </div>
+          ) : itemVisible === "Translation" ? (
+            <div className={styles.rightItem}>
+              <div className={styles.translationWrapper}>
+                <div className={styles.headingWrapper}>
+                  <div className={styles.heading}>
+                    <h3>Enable Live Translation</h3>
+                    <p>
+                      Powered by Vocalize's AI Model for near real-time speech
+                      translation.
+                    </p>
+                  </div>
+                  <Switch
+                    className={styles.switch}
+                    checked={isTranslationEnabled}
+                    onChange={handleTranslationToggle}
+                  />
+                </div>
+                <div className={styles.optionsWrapper}>
+                  <div className={styles.languageSelector}>
+                    <p>I will be talking in: </p>
+                    <select value={myLanguage} onChange={handleLanguageChange}>
+                      <option value="English">English</option>
+                      <option value="Hindi">Hindi</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+);
 
 const Meeting = () => {
   const { socket } = useConnections();
@@ -30,6 +164,15 @@ const Meeting = () => {
   const { id } = useParams();
   const location = useLocation();
   const { micStatus, camStatus } = useDetectUserStatus();
+
+  const [settings, setSettings] = useState({
+    isCaptionsEnabled: false,
+    isTranslationEnabled: false,
+    myLanguage: "Hindi",
+  });
+  const { transcript, startListening, stopListening, reset } = useSpeechHandler(
+    settings?.myLanguage === "Hindi" ? "hi-IN" : "en-US"
+  );
 
   const [lastCaptionTime, setLastCaptionTime] = useState(Date.now());
   const [itemVisible, setItemVisible] = useState("Media Devices");
@@ -40,11 +183,21 @@ const Meeting = () => {
 
   const streamRef = useRef(null);
 
-  const [settingsConfig, setSettingsConfig] = useState({
-    isCaptionsEnabled: false,
-    isTranslationEnabled: false,
-    speakerLanguage: "English",
-  });
+  const handleCaptionsChange = useCallback((checked) => {
+    setSettings((prev) => ({ ...prev, isCaptionsEnabled: checked }));
+  }, []);
+
+  const handleTranslationChange = useCallback((checked) => {
+    setSettings((prev) => ({ ...prev, isTranslationEnabled: checked }));
+  }, []);
+
+  const handleLanguageChange = useCallback(
+    (language) => {
+      setSettings((prev) => ({ ...prev, myLanguage: language }));
+      reset();
+    },
+    [reset]
+  );
 
   const [showTranslationNotification, setShowTranslationNotification] =
     useState(false);
@@ -75,7 +228,7 @@ const Meeting = () => {
     }
   };
 
-  const fetchTranslation = async (captions) => {
+  const fetchTranslation = async (captions, srcLanguage) => {
     const options = {
       method: "POST",
       url: `${TRANSLATION_ENDPOINT}/translate`,
@@ -83,20 +236,20 @@ const Meeting = () => {
         "Content-Type": "application/json",
       },
       data: JSON.stringify({
-        source: settingsConfig.speakerLanguage === "English" ? "en" : "hi",
-        target: settingsConfig.speakerLanguage === "English" ? "hi" : "en",
+        source: srcLanguage === "English" ? "en" : "hi",
+        target: srcLanguage === "English" ? "hi" : "en",
         message: captions,
       }),
     };
 
     try {
+      console.log("Translation Request Initiated: ", options);
       const response = await axios(options);
+      console.log("Translation Response: ", response);
       console.log(response);
-      speakText(
-        response.data.translated_message,
-        settingsConfig.speakerLanguage
-      );
+      speakText(response.data.translated_message, srcLanguage);
     } catch (error) {
+      console.log("Translation Error: ", error);
       console.log(error);
       showToast("Failed to translate", "error");
     }
@@ -115,6 +268,78 @@ const Meeting = () => {
       micBtn.click();
     }
   };
+
+  const settingsRef = useRef(settings);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  useEffect(() => {
+    const handleNewUser = (data) => {
+      console.log(data);
+    };
+
+    const handleUserStatus = (data) => {
+      if (data.isMicOn == false) {
+        setShowCaptions(false);
+      } else {
+        setShowCaptions(true);
+      }
+    };
+
+    const handleStartTranslation = (data) => {
+      if (data.isTranslationEnabledForRemoteUser) {
+        setShowTranslationNotification(true);
+        showToast(
+          "Your Voice is now being translated for other user",
+          "success"
+        );
+        mute();
+      }
+    };
+
+    const handleStopTranslation = (data) => {
+      if (!data.isTranslationEnabledForRemoteUser) {
+        setShowTranslationNotification(false);
+        unmute();
+      }
+    };
+
+    const handlePushCaptions = (data) => {
+      setCaptions(data.caption);
+      if (captions.length === captionThreshold) {
+        setCaptions("");
+      }
+    };
+
+    const handlePushTranslation = (data) => {
+      console.log("Translation Caption Received! : ", data.caption);
+      if (settingsRef.current.isTranslationEnabled) {
+        console.log("Enabled");
+        fetchTranslation(data.caption, data.speakerLanguage);
+      } else {
+        console.log("Disabled");
+      }
+    };
+
+    socket.on("new-user", handleNewUser);
+    socket.on("user-status", handleUserStatus);
+    socket.on("start-translation", handleStartTranslation);
+    socket.on("stop-translation", handleStopTranslation);
+    socket.on("push-captions", handlePushCaptions);
+    socket.on("push-translation", handlePushTranslation);
+
+    // Cleanup function to remove all event listeners
+    return () => {
+      socket.off("new-user", handleNewUser);
+      socket.off("user-status", handleUserStatus);
+      socket.off("start-translation", handleStartTranslation);
+      socket.off("stop-translation", handleStopTranslation);
+      socket.off("push-captions", handlePushCaptions);
+      socket.off("push-translation", handlePushTranslation);
+    };
+  }, []);
 
   useEffect(() => {
     console.log("showTranslationNotification", showTranslationNotification);
@@ -144,51 +369,17 @@ const Meeting = () => {
   }, [micStatus, camStatus]);
 
   useEffect(() => {
-    SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
-    socket.on("new-user", (data) => {
-      console.log(data);
-    });
-
-    socket.on("user-status", (data) => {
-      if (data.isMicOn == false) {
-        setShowCaptions(false);
-      } else {
-        setShowCaptions(true);
-      }
-    });
-
-    socket.on("start-translation", (data) => {
-      if (data.isTranslationEnabledForRemoteUser) {
-        setShowTranslationNotification(true);
-        showToast(
-          "Your Voice is now being translated for other user",
-          "success"
-        );
-        mute();
-      }
-    });
-
-    socket.on("stop-translation", (data) => {
-      if (!data.isTranslationEnabledForRemoteUser) {
-        setShowTranslationNotification(false);
-        unmute();
-      }
-    });
-
-    socket.on("push-captions", (data) => {
-      setCaptions(data.caption);
-      if (captions.length === captionThreshold) {
-        setCaptions("");
-      }
-    });
-
-    socket.on("push-translation", (data) => {
-      console.log("Translation Caption Received! : ", data.caption);
-      if (settingsConfig.isTranslationEnabled) {
-        fetchTranslation(data.caption);
-      }
-    });
-  }, []);
+    if (settings.myLanguage) {
+      const langCode = settings.myLanguage === "Hindi" ? "hi-IN" : "en-IN";
+      stopListening();
+      setTimeout(() => {
+        startListening({
+          continuous: true,
+          language: langCode,
+        });
+      }, 100);
+    }
+  }, [settings.myLanguage]);
 
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isInRoom, setIsInRoom] = useState(false);
@@ -196,12 +387,9 @@ const Meeting = () => {
   const zegoUIKit = useRef(null);
   const name = location.state?.data?.user?.name ?? "Guest User";
 
-  const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
-
   const MeetingComp = useCallback(
     async (element) => {
-      if (!element || isInRoom) return; // Prevent joining again if already in the room
+      if (!element || isInRoom) return;
 
       const appId = Number(APP_ID);
       const server = APP_SECRET.toString();
@@ -215,11 +403,9 @@ const Meeting = () => {
         name
       );
 
-      // Create ZegoUIKit instance
       const zc = ZegoUIKitPrebuilt.create(kitToken);
       zegoUIKit.current = zc;
 
-      // Join the room
       zc.joinRoom({
         container: element,
         scenario: {
@@ -227,7 +413,6 @@ const Meeting = () => {
         },
       });
 
-      // Set the flag to indicate you're in the room
       setIsInRoom(true);
       socket.emit("add-to-room", {
         roomId: id,
@@ -246,26 +431,25 @@ const Meeting = () => {
   }, [isInRoom, MeetingComp]);
 
   useEffect(() => {
-    if (browserSupportsSpeechRecognition) {
-      if (transcript) {
-        console.log("RT Transcript: ", transcript);
-        if (transcript.split(" ").length > 20) {
-          console.log("Transcript: ", transcript);
-          socket.emit("push-translation", {
-            roomId: id,
-            userId: userId,
-            caption: transcript,
-          });
-          resetTranscript();
-        }
-        socket.emit("push-captions", {
+    if (transcript) {
+      console.log("RT Transcript: ", transcript);
+      if (transcript.split(" ").length > 20) {
+        console.log("Transcript: ", transcript);
+        socket.emit("push-translation", {
           roomId: id,
           userId: userId,
           caption: transcript,
+          speakerLanguage: settingsRef.current.myLanguage,
         });
-      } else {
-        console.log("No Transcript");
+        reset();
       }
+      socket.emit("push-captions", {
+        roomId: id,
+        userId: userId,
+        caption: transcript,
+      });
+    } else {
+      console.log("No Transcript");
     }
   }, [transcript]);
 
@@ -274,174 +458,6 @@ const Meeting = () => {
       initializeMeeting(MeetingComp.current);
     }
   }, []);
-
-  useEffect(() => {
-    if (settingsConfig.isCaptionsEnabled) {
-    }
-
-    if (settingsConfig.isTranslationEnabled) {
-      socket.emit("start-translation", {
-        roomId: id,
-        isTranslationEnabled: true,
-        speakerLanguage: settingsConfig.speakerLanguage,
-      });
-    } else {
-      socket.emit("stop-translation", {
-        roomId: id,
-        isTranslationEnabled: false,
-      });
-    }
-  }, [settingsConfig]);
-
-  const Settings = ({
-    settingsConfig,
-    isCaptionsEnabled,
-    isTranslationEnabled,
-    speakerLanguage,
-  }) => {
-    const leftItems = [
-      {
-        title: "Captions",
-        icon: <BsCcCircle />,
-      },
-      {
-        title: "Translation",
-        icon: <BsTranslate />,
-      },
-    ];
-
-    return (
-      <div className={styles.modalSettings}>
-        <div className={styles.left}>
-          <h2>Settings</h2>
-          <div className={styles.itemWrapper}>
-            {leftItems.map((item, index) => {
-              return (
-                <div
-                  key={index}
-                  className={`${styles.item} ${
-                    itemVisible === item.title ? styles.focused : ""
-                  }`}
-                  onClick={() => {
-                    setItemVisible(item.title);
-                  }}
-                >
-                  {item.icon}
-                  <p>{item.title}</p>
-                  {item.title == "Translation" && <BsStars />}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <div className={styles.right}>
-          <h2>{itemVisible}</h2>
-          {itemVisible === "Captions" ? (
-            <div className={styles.rightItem}>
-              <div className={styles.capitonWrapper}>
-                <div className={styles.info}>
-                  <h3>Enable Realtime Captions</h3>
-                  <p>
-                    Realtime captions are generated by identifying the speech in
-                    the audio stream and converting it to text
-                    <br /> <b>(Supports English & Hindi Languages only).</b>
-                  </p>
-                </div>
-                <Switch
-                  className={styles.switch}
-                  checkedChildren={<CheckOutlined />}
-                  unCheckedChildren={<CloseOutlined />}
-                  defaultChecked={settingsConfig.isCaptionsEnabled}
-                  onChange={(checked) => {
-                    if (checked) {
-                      showToast("Captions Enabled", "success");
-                      isCaptionsEnabled(true);
-                    } else {
-                      showToast("Captions Disabled", "success");
-                      isCaptionsEnabled(false);
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          ) : itemVisible === "Translation" ? (
-            <div className={styles.rightItem}>
-              <div className={styles.translationWrapper}>
-                <div className={styles.headingWrapper}>
-                  <div className={styles.heading}>
-                    <h3>Enable Live Translation</h3>
-                    <p>
-                      Live translation is powered by Vocalize Powerful Machine
-                      Learning Model that translates the speech in real-time to
-                      the selected language.
-                    </p>
-                  </div>
-                  <Switch
-                    className={styles.switch}
-                    checkedChildren={<CheckOutlined />}
-                    unCheckedChildren={<CloseOutlined />}
-                    defaultChecked={settingsConfig.isTranslationEnabled}
-                    onChange={(checked) => {
-                      console.log(checked);
-                      if (checked) {
-                        showToast("Translation Enabled", "success");
-                        isTranslationEnabled(true);
-                      } else {
-                        showToast("Translation Disabled", "success");
-                        isTranslationEnabled(false);
-                      }
-                    }}
-                  />
-                </div>
-                <div className={styles.optionsWrapper}>
-                  <div className={styles.languageSelector}>
-                    <p>Speaker is talking in : </p>
-                    <select
-                      name=""
-                      id=""
-                      value={settingsConfig.speakerLanguage}
-                      onChange={(e) => {
-                        if (e.target.value === "Hindi") {
-                          speakerLanguage("Hindi");
-                        } else {
-                          speakerLanguage("English");
-                        }
-                      }}
-                    >
-                      <option value="English">English</option>
-                      <option value="Hindi">Hindi</option>
-                    </select>
-                  </div>
-                  <div className={styles.languageSelector}>
-                    <p>I want to listen in : </p>
-                    <select
-                      name=""
-                      id=""
-                      value={
-                        settingsConfig.speakerLanguage == "English"
-                          ? "Hindi"
-                          : "English"
-                      }
-                      onChange={(e) => {
-                        if (e.target.value === "Hindi") {
-                          speakerLanguage("English");
-                        } else {
-                          speakerLanguage("Hindi");
-                        }
-                      }}
-                    >
-                      <option value="English">English</option>
-                      <option value="Hindi">Hindi</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className={styles.main}>
@@ -458,43 +474,14 @@ const Meeting = () => {
         width={modalWidth}
       >
         <Settings
-          settingsConfig={settingsConfig}
-          selectMic={(data) => {
-            setSettingsConfig((prevConfig) => ({
-              ...prevConfig,
-              selectedAudioDevice: data,
-            }));
-          }}
-          selectVideo={(data) => {
-            setSettingsConfig((prevConfig) => ({
-              ...prevConfig,
-              selectedVideoDevice: data,
-            }));
-          }}
-          selectSpeaker={(data) => {
-            setSettingsConfig((prevConfig) => ({
-              ...prevConfig,
-              selectedAudioOutputDevice: data,
-            }));
-          }}
-          isCaptionsEnabled={(data) => {
-            setSettingsConfig((prevConfig) => ({
-              ...prevConfig,
-              isCaptionsEnabled: data,
-            }));
-          }}
-          isTranslationEnabled={(data) => {
-            setSettingsConfig((prevConfig) => ({
-              ...prevConfig,
-              isTranslationEnabled: data,
-            }));
-          }}
-          speakerLanguage={(data) => {
-            setSettingsConfig((prevConfig) => ({
-              ...prevConfig,
-              speakerLanguage: data,
-            }));
-          }}
+          isCaptionsEnabled={settings.isCaptionsEnabled}
+          isTranslationEnabled={settings.isTranslationEnabled}
+          myLanguage={settings.myLanguage}
+          setCaptionsEnabled={handleCaptionsChange}
+          setTranslationEnabled={handleTranslationChange}
+          setLanguage={handleLanguageChange}
+          roomId={id}
+          socket={socket}
         />
       </Modal>
       <div
@@ -516,7 +503,7 @@ const Meeting = () => {
           />
         </div>
       )}
-      {settingsConfig.isCaptionsEnabled && showCaptions && (
+      {settings.isCaptionsEnabled && showCaptions && (
         <div className={styles.captions}>
           <p>{captions}</p>
         </div>
@@ -530,9 +517,7 @@ const Meeting = () => {
           }}
         >
           <BsTranslate />
-          {settingsConfig.isTranslationEnabled && (
-            <div className={styles.dot}></div>
-          )}
+          {settings.isTranslationEnabled && <div className={styles.dot}></div>}
         </div>
         <div
           className={styles.button}
@@ -542,9 +527,7 @@ const Meeting = () => {
           }}
         >
           <BiCaptions />
-          {settingsConfig.isCaptionsEnabled && (
-            <div className={styles.dot}></div>
-          )}
+          {settings.isCaptionsEnabled && <div className={styles.dot}></div>}
         </div>
       </div>
     </div>

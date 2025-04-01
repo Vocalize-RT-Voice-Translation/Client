@@ -16,17 +16,6 @@ const SpeechTranscription = () => {
   if (!browserSupportsSpeechRecognition) {
     return <p>Browser doesn't support speech recognition.</p>;
   }
-
-  const speakText = (text) => {
-    window.responsiveVoice.speak(text, "UK English Male"); // Change to "UK English Female"
-  };
-
-  useEffect(() => {
-    speakText(
-      "Welcome to Real-Time Speech Transcription. This is a demo of real-time speech transcription using the Web Speech API."
-    );
-  }, []);
-
   return isBrave ? (
     <div>
       <h1>Brave Browser Not Supported</h1>
@@ -39,7 +28,7 @@ const SpeechTranscription = () => {
         onClick={() =>
           SpeechRecognition.startListening({
             continuous: true,
-            language: "en-IN",
+            language: "en-US",
           })
         }
       >
